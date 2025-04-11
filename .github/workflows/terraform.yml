@@ -1,0 +1,56 @@
+name: 'Terraform'
+
+on:
+  push:
+    branches: [ "dev" ]  # "dev" 브랜치에 푸시될 때 워크플로 실행
+  pull_request:          # PR이 열리거나 업데이트될 때도 실행
+
+env:
+  AWS_REGION: ap-northeast-2  # AWS 리전 설정
+
+permissions:
+  contents: read  # 코드 읽기 권한만 부여
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest  # 최신 Ubuntu 환경에서 실행
+    environment: production  # GitHub 환경 이름 (옵션)
+
+    # GitHub Actions 런너 환경이 무엇이든 간에 bash 셸을 사용
+    defaults:
+      run:
+        shell: bash
+        working-directory: infra/terraformInfra # 해당 디렉토리 내의 tf파일만 실행
+
+    steps:
+    # 리포지토리 코드를 GitHub Actions 런너에 체크아웃
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # AWS 자격 증명 설정 (깃허브 OIDC 사용)
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1.7.0
+      with:
+        role-to-assume: arn:aws:iam::418295688903:role/GitHubActionsOIDCRole #깃허브 액션 역할의 ARN으로 설정
+        role-session-name: GitHub_to_AWS_via_FederatedOIDC #CloudTrail 같은 곳에서 로깅될 때 유용하게 쓰임
+        aws-region: ${{ env.AWS_REGION }}
+
+    # Terraform 작업 디렉터리를 초기화 (백엔드 연결, 모듈 다운로드 등)
+    - name: Terraform Init
+      run: terraform init
+
+    # Terraform 코드 형식을 검사 (정해진 포맷대로 작성되었는지 확인)
+    - name: Terraform Format
+      run: terraform fmt -check
+
+    # Terraform 실행 계획(plan)을 생성 (어떤 변경이 일어날지 미리 확인)
+    - name: Terraform Plan
+      run: terraform plan -input=false
+
+    # "dev" 브랜치에 push가 발생했을 때, 실제 인프라를 변경(apply)
+    # 참고: Terraform Cloud의 "strict" 상태 체크를 설정하는 것이 권장됨
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+      run: terraform apply -auto-approve -input=false
+
