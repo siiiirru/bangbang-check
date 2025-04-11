@@ -36,6 +36,10 @@ jobs:
         role-session-name: GitHub_to_AWS_via_FederatedOIDC #CloudTrail 같은 곳에서 로깅될 때 유용하게 쓰임
         aws-region: ${{ env.AWS_REGION }}
 
+    # Terraform CLI 설치
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+
     # Terraform 작업 디렉터리를 초기화 (백엔드 연결, 모듈 다운로드 등)
     - name: Terraform Init
       run: terraform init
