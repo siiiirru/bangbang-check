@@ -66,12 +66,15 @@ resource "aws_iam_role" "github_actions_role" {
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
-          StringEquals = {
-            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+            StringEquals = {
+                "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+            }
             # 여기에 GitHub repo 정보
             StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:siiiirru/bangbang-check:ref:refs/heads/*"
-            }
+            "token.actions.githubusercontent.com:sub" = [
+                "repo:siiiirru/bangbang-check:ref:refs/heads/*",
+                "repo:siiiirru/bangbang-check:ref:refs/pull/*"
+            ]
           }
         }
       }
