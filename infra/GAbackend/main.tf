@@ -69,7 +69,7 @@ resource "aws_iam_role" "github_actions_role" {
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
             # 여기에 GitHub repo 정보
-            "token.actions.githubusercontent.com:sub" = "repo:siiiirru/bangbang-check:*"
+            "token.actions.githubusercontent.com:sub" = "repo:siiiirru/bangbang-check:ref:refs/heads/dev"
           }
         }
       }
