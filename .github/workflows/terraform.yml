@@ -16,7 +16,6 @@ jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest  # 최신 Ubuntu 환경에서 실행
-    environment: production  # GitHub 환경 이름 (옵션)
 
     # GitHub Actions 런너 환경이 무엇이든 간에 bash 셸을 사용
     defaults:
