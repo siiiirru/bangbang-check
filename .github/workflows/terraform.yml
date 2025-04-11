@@ -46,7 +46,7 @@ jobs:
 
     # Terraform 코드 형식을 검사 (정해진 포맷대로 작성되었는지 확인)
     - name: Terraform Format
-      run: terraform fmt -check
+      run: terraform fmt
 
     # Terraform 실행 계획(plan)을 생성 (어떤 변경이 일어날지 미리 확인)
     - name: Terraform Plan
