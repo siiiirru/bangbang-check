@@ -30,7 +30,7 @@ jobs:
 
     # AWS 자격 증명 설정 (깃허브 OIDC 사용)
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1.7.0
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         role-to-assume: arn:aws:iam::418295688903:role/GitHubActionsOIDCRole #깃허브 액션 역할의 ARN으로 설정
         role-session-name: GitHub_to_AWS_via_FederatedOIDC #CloudTrail 같은 곳에서 로깅될 때 유용하게 쓰임
