@@ -71,10 +71,7 @@ resource "aws_iam_role" "github_actions_role" {
             }
             # 여기에 GitHub repo 정보
             StringLike = {
-            "token.actions.githubusercontent.com:sub" = [
-                "repo:siiiirru/bangbang-check:ref:refs/heads/*",
-                "repo:siiiirru/bangbang-check:ref:refs/pull/*"
-            ]
+            "token.actions.githubusercontent.com:sub" = "repo:siiiirru/bangbang-check:*"
           }
         }
       }
