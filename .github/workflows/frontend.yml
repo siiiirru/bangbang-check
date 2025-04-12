@@ -46,9 +46,9 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-        role-to-assume: arn:aws:iam::418295688903:role/GitHubActionsOIDCRole 
-        role-session-name: GitHub_to_AWS_via_FederatedOIDC 
-        aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::418295688903:role/GitHubActionsOIDCRole 
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC 
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Upload to S3
         uses: jakejarvis/s3-sync-action@master
