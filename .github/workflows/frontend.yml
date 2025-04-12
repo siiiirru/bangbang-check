@@ -32,7 +32,7 @@ jobs:
 
       # frontend 디렉토리에서 프로젝트의 종속성 설치
       - name: install deps
-        run: npm install --legacy-peer-deps
+        run: npm install ajv@^6.12.6 --save --legacy-peer-deps 
         working-directory: ./frontend
 
       # Next.js 빌드 및 export
