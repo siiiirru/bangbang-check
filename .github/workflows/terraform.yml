@@ -2,8 +2,13 @@ name: 'Terraform'
 
 on:
   push:
-    branches: [ "dev" ]  # "dev" 브랜치에 푸시될 때 워크플로 실행
-  pull_request:          # PR이 열리거나 업데이트될 때도 실행
+    branches: [ "dev" ]
+    paths:
+      - "infra/terraformInfra/**"  # terraform 폴더 내 파일만 변경될 때 실행
+  pull_request:
+    paths:
+      - "infra/terraformInfra/**"  # pull request 시에도 terraform 폴더 변경 시에만 실행
+
 
 env:
   AWS_REGION: ap-northeast-2  # AWS 리전 설정
