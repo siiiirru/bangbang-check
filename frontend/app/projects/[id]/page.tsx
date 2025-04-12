@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -11,7 +10,35 @@ import { GoProject, Header } from "@/components/header"
 import { AiRecommendation } from "@/components/room/ai-recommendation"
 import { ResetConfirmModal } from "@/components/room/reset-confirm-modal"
 
+// 예시 데이터로 프로젝트 정보를 반환하는 함수
+export async function getProjectData(id: string) {
+  // 하드코딩된 예시 데이터
+  const projectData = {
+    '1': {
+      title: '프로젝트 1',
+      description: '이것은 프로젝트 1에 대한 설명입니다.',
+    },
+    '2': {
+      title: '프로젝트 2',
+      description: '이것은 프로젝트 2에 대한 설명입니다.',
+    },
+    '3': {
+      title: '프로젝트 3',
+      description: '이것은 프로젝트 3에 대한 설명입니다.',
+    },
+  };
+}
 
+// app/projects/[id]/page.tsx
+export const generateStaticParams = async () => {
+  // 하드코딩된 프로젝트 ID 목록을 반환합니다
+  const projectIds = ['1', '2', '3']; // 예시로 프로젝트 ID 리스트를 하드코딩합니다.
+
+  // 각 프로젝트 ID에 대한 경로를 반환합니다
+  return projectIds.map((id) => ({
+    id,
+  }));
+};
 
 interface ProjectPageProps {
   params: {
