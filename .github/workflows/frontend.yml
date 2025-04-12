@@ -31,10 +31,8 @@ jobs:
           node-version: '18'
 
       # frontend 디렉토리에서 프로젝트의 종속성 설치
-      - name: Remove package-lock.json and node_modules
-        run: |
-          rm -f package-lock.json
-          npm install --legacy-peer-deps
+      - name: install deps
+        run: npm install --legacy-peer-deps
         working-directory: ./frontend
 
       # Next.js 빌드 및 export
