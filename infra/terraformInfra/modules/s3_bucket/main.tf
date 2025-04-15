@@ -42,7 +42,7 @@ resource "aws_s3_bucket_policy" "website_policy" {
         Principal = {
           AWS = "arn:aws:iam::418295688903:role/GitHubActionsOIDCRole"  # GitHub Actions 역할 ARN으로 교체
         },
-        Action    = "s3:PutObject",
+        Action    = ["s3:PutObject","s3:DeleteObject"]
         Resource  = "${aws_s3_bucket.this.arn}/*"
       }
     ]
