@@ -37,8 +37,8 @@
       "react-app/jest"
     ],
     "rules": {
-    "no-warning-comments": "off", // 경고를 무시하는 설정 추가
-    "react-hooks/exhaustive-deps": "off" // 특정 ESLint 규칙을 비활성화하는 예시
+    "no-warning-comments": "off", 
+    "react-hooks/exhaustive-deps": "off" 
   }
   },
   "browserslist": {
