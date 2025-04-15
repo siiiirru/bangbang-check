@@ -12,6 +12,7 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2  # AWS 리전 설정
+  AWS_S3_BUCKET: bangbang-check
 
 permissions:
   id-token: write      # OIDC 토큰을 가져올 수 있도록 허용
@@ -52,6 +53,4 @@ jobs:
       # AWS CLI로 S3에 업로드
       - name: Upload to S3 using AWS CLI
         run: |
-          aws s3 sync ./frontend/build s3://${{ secrets.AWS_S3_BUCKET }} --delete
-        env:
-          AWS_S3_BUCKET: bangbang-check
+          aws s3 sync ./frontend/build s3://${{ env.AWS_S3_BUCKET }} --delete
