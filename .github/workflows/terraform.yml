@@ -60,6 +60,6 @@ jobs:
     # "dev" 브랜치에 push가 발생했을 때, 실제 인프라를 변경(apply)
     # 참고: Terraform Cloud의 "strict" 상태 체크를 설정하는 것이 권장됨
     - name: Terraform Apply
-      if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+    #  if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
       run: terraform apply -auto-approve -input=false
 
