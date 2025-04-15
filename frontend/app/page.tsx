@@ -86,13 +86,13 @@ export default function Home() {
       </div>
 
       <div className="bg-gradient-to-br from-fuchsia-50 to-pink-50 rounded-xl p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-fuchsia-700 mb-4">공지사항</h2>
+        <h2 className="text-xl font-bold text-fuchsia-700 mb-4">방방체크</h2>
         <ul className="space-y-2">
           <li className="text-sm text-gray-700 pb-2 border-b border-pink-100">
-            서비스 이용 안내 및 업데이트 소식
+            비어있는 집보다 비어있는 체크리스트가 더 무섭다...
           </li>
           <li className="text-sm text-gray-700 pb-2 border-b border-pink-100">
-            4월 이벤트: 신규 가입자 혜택 안내
+            "이 정도면 괜찮겠지?" → 자취 3개월 후의 나: 😐
           </li>
         </ul>
       </div>
