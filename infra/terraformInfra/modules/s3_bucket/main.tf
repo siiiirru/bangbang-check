@@ -28,12 +28,24 @@ resource "aws_s3_bucket_policy" "website_policy" {
   bucket = aws_s3_bucket.this.id
   policy = jsonencode({
     Version = "2012-10-17",
-    Statement = [{
-      Sid       = "PublicReadGetObject",
-      Effect    = "Allow",
-      Principal = "*",
-      Action    = "s3:GetObject",
-      Resource  = "${aws_s3_bucket.this.arn}/*"
-    }]
+    Statement = [
+      {
+        Sid       = "PublicReadGetObject",
+        Effect    = "Allow",
+        Principal = "*",
+        Action    = "s3:GetObject",
+        Resource  = "${aws_s3_bucket.this.arn}/*"
+      },
+      {
+        Sid       = "GitHubActionsPutObject",
+        Effect    = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::418295688903:role/GitHubActionsOIDCRole"  # GitHub Actions 역할 ARN으로 교체
+        },
+        Action    = "s3:PutObject",
+        Resource  = "${aws_s3_bucket.this.arn}/*"
+      }
+    ]
   })
 }
+
