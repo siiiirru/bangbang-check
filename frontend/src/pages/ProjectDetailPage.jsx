@@ -101,7 +101,7 @@ export default function ProjectDetailPage() {
         console.error("순위 업데이트 중 오류 발생:", error)
       }
     },
-    [id],
+    // [id],
   )
 
   return (

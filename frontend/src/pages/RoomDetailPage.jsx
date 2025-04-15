@@ -113,7 +113,7 @@ export default function RoomDetailPage() {
             }catch (error) {
                 console.error("별점 토글 중 오류 발생:", error)
               }
-            }, [roomData, id, roomId])
+            }, [roomData,isStarred]) //api 연결 시 id, roomId 추가
 
     if (isLoading || !roomData) {
         return (

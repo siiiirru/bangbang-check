@@ -182,11 +182,11 @@ export function SignupForm() {
       </div>
       <div className="text-xs text-muted-foreground text-center">
         회원가입 시{" "}
-        <a href="#" className="underline underline-offset-4 hover:text-fuchsia-600">
+        <a href="none" className="underline underline-offset-4 hover:text-fuchsia-600">
           이용약관
         </a>{" "}
         및{" "}
-        <a href="#" className="underline underline-offset-4 hover:text-fuchsia-600">
+        <a href="none" className="underline underline-offset-4 hover:text-fuchsia-600">
           개인정보처리방침
         </a>
         에 동의하게 됩니다.

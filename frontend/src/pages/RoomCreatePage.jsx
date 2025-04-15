@@ -14,7 +14,7 @@ export default function RoomCreatePage() {
     const roomName = queryParams.get("name") || "새 방"
   
     // 기본 방 데이터
-    const [roomData, setRoomData] = useState({
+    const [roomData] = useState({
       name: roomName,
       photos: [],
       address: { main: "", detail: "" },

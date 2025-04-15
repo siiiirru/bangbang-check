@@ -90,7 +90,7 @@ export function LoginForm() {
                   required
                 />
                 <div className="flex justify-end mt-1">
-                  <a href="#" className="text-xs text-muted-foreground hover:text-fuchsia-600">
+                  <a href="/find-pw" className="text-xs text-muted-foreground hover:text-fuchsia-600">
                     비밀번호 찾기
                   </a>
                 </div>

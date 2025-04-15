@@ -52,7 +52,7 @@ function AlertDialogFooter({ className, ...props }) {
 }
 
 function AlertDialogTitle({ className, ...props }) {
-  return <h3 className={cn("text-lg font-semibold", className)} {...props} />
+  return <h3 className={cn("text-lg font-semibold", className)} {...props}> </h3>
 }
 
 function AlertDialogDescription({ className, ...props }) {
