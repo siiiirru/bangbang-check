@@ -35,11 +35,10 @@ jobs:
         run: npm install ajv@^6.12.6 --save --legacy-peer-deps 
         working-directory: ./frontend
 
-      # Next.js 빌드 및 export
+      # 리액트 빌드 및 export
       - name: Build and Export
         run: |
           npm run build
-          npm run export
         working-directory: ./frontend
 
     # AWS 자격 증명 설정 (깃허브 OIDC 사용)
@@ -56,4 +55,4 @@ jobs:
           args: --delete
         env:
           AWS_S3_BUCKET: bangbang-check
-          SOURCE_DIR: frontend/out
+          SOURCE_DIR: frontend/build
