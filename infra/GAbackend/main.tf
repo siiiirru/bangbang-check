@@ -105,3 +105,18 @@ resource "aws_iam_role_policy_attachment" "apigateway_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonAPIGatewayAdministrator"
 }
 
+resource "aws_iam_role_policy" "allow_put_bucket_policy" {
+  name = "AllowPutBucketPolicy"
+  role = aws_iam_role.github_actions_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "iam:PutBucketPolicy"
+        Resource = "arn:aws:s3:::bangbang-check"  # 해당 버킷에 대한 권한
+      }
+    ]
+  })
+}

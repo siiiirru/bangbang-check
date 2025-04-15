@@ -12,6 +12,7 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2  # AWS 리전 설정
+  AWS_S3_BUCKET: bangbang-check
 
 permissions:
   id-token: write      # OIDC 토큰을 가져올 수 있도록 허용
@@ -32,14 +33,13 @@ jobs:
 
       # frontend 디렉토리에서 프로젝트의 종속성 설치
       - name: install deps
-        run: npm install --legacy-peer-deps
+        run: npm install ajv@^6.12.6 --save --legacy-peer-deps 
         working-directory: ./frontend
 
-      # Next.js 빌드 및 export
+      # 리액트 빌드 및 export
       - name: Build and Export
         run: |
           npm run build
-          npm run export
         working-directory: ./frontend
 
     # AWS 자격 증명 설정 (깃허브 OIDC 사용)
@@ -50,10 +50,7 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC 
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Upload to S3
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --delete
-        env:
-          AWS_S3_BUCKET: bangbang-check
-          SOURCE_DIR: frontend/out
+      # AWS CLI로 S3에 업로드
+      - name: Upload to S3 using AWS CLI
+        run: |
+          aws s3 sync ./frontend/build s3://${{ env.AWS_S3_BUCKET }} --delete
