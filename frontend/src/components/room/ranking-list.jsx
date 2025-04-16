@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { Skeleton } from "../ui/skeleton"
 import { Button } from "../ui/button"
 import { Check } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger} from "../ui/select"
 
 export function RankingList({ rankings, isLoading, allRooms, onUpdateRanking }) {
   const [selectedRooms, setSelectedRooms] = useState({})
