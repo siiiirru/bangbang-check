@@ -9,10 +9,11 @@ import { API_BASE_URL } from "../../config"
 
 export function SignupForm() {
   const [isLoading, setIsLoading] = useState(false)
-  const [userId, setUserId] = useState("")
+  const [username, setUsername] = useState("")
   const [nickname, setNickname] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [email, setEmail] = useState("")
   const [error, setError] = useState("")
   const navigate = useNavigate()
 
@@ -35,7 +36,14 @@ export function SignupForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId, nickname, password }),
+        body: JSON.stringify({
+          username,
+          password,
+          attributes: {
+            email,
+            nickname
+          }
+        }),
       })
 
       const data = await response.json()
@@ -59,13 +67,33 @@ export function SignupForm() {
       {error && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{error}</div>}
       <form onSubmit={onSubmit}>
         <div className="grid gap-4">
+        <div className="grid gap-2">
+            <div className="flex items-center gap-4">
+              <Label htmlFor="email" className="w-24 text-left text-slate-950">
+                이메일:
+              </Label>
+              <Input
+                id="email"
+                placeholder="이메일을 입력하세요"
+                type="email"
+                autoCapitalize="none"
+                autoComplete="email"
+                autoCorrect="off"
+                className="text-black"
+                disabled={isLoading}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+          </div>
           <div className="grid gap-2">
             <div className="flex items-center gap-4">
               <Label htmlFor="userId" className="w-24 text-left text-slate-950">
                 아이디:
               </Label>
               <Input
-                id="userId"
+                id="username"
                 placeholder="아이디를 입력하세요"
                 type="text"
                 autoCapitalize="none"
@@ -73,8 +101,8 @@ export function SignupForm() {
                 autoCorrect="off"
                 className="text-black"
                 disabled={isLoading}
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>

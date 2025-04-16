@@ -9,7 +9,7 @@ import { API_BASE_URL } from "../../config"
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
-  const [userId, setUserId] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const navigate = useNavigate()
@@ -26,7 +26,7 @@ export function LoginForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId, password }),
+        body: JSON.stringify({ username, password }),
       })
 
       const data = await response.json()
@@ -53,11 +53,11 @@ export function LoginForm() {
         <div className="grid gap-4">
           <div className="grid gap-2">
             <div className="flex items-center gap-4">
-              <Label htmlFor="userId" className="w-24 text-left text-slate-800">
+              <Label htmlFor="username" className="w-24 text-left text-slate-800">
                 아이디:
               </Label>
               <Input
-                id="userId"
+                id="username"
                 placeholder="아이디를 입력하세요"
                 type="text"
                 autoCapitalize="none"
@@ -65,8 +65,8 @@ export function LoginForm() {
                 autoCorrect="off"
                 className="text-black"
                 disabled={isLoading}
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
