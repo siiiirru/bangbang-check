@@ -11,13 +11,13 @@ terraform {
 module "website_bucket" {
     source = "./modules/s3_bucket"
 
-    bucket_name = var.project-name
+    bucket_name = var.project_name
     enable_website = true
     is_public = true
     tags = {
         Name = "website_bucket"
         Environment = "dev"
-        Project = var.project-name
+        Project = var.project_name
     }
     force_destroy = true
 }
@@ -31,7 +31,7 @@ module "image_bucket" {
     tags = {
         Name = "image_bucket"
         Environment = "dev"
-        Project = var.project-name
+        Project = var.project_name
     }
     force_destroy = true
 }
@@ -40,11 +40,11 @@ module "image_bucket" {
 module "cognito" {
     source           = "./modules/cognito"
     user_pool_name   = "bangbang-check-userpool"
-    app_client_name  = var.project-name
-    callback_urls    = [var.frontend-local-url]
-    logout_urls      = [var.frontend-local-url]
-    domain_prefix    = var.project-name
-    region = var.project-name
+    app_client_name  = var.project_name
+    callback_urls    = [var.frontend_local_url]
+    logout_urls      = [var.frontend_local_url]
+    domain_prefix    = var.project_name
+    region = var.project_name
 }
 
 # module "user_table" {
