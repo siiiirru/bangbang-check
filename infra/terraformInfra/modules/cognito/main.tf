@@ -18,6 +18,9 @@ resource "aws_cognito_user_pool" "this"{
     require_numbers = true
   }
   
+  lifecycle {
+    ignore_changes = [schema]
+  }
 }
 
 resource "aws_cognito_user_pool_client" "this" {
