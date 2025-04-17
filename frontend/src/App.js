@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom"
 import { AuthProvider } from "./context/AuthContext";
+import { Amplify } from 'aws-amplify';
 
 // 페이지 컴포넌트 임포트
 import HomePage from "./pages/HomePage"
@@ -10,6 +11,21 @@ import ProjectDetailPage from "./pages/ProjectDetailPage"
 import RoomCreatePage from "./pages/RoomCreatePage"
 import RoomDetailPage from "./pages/RoomDetailPage"
 import SettingsPage from "./pages/SettingsPage"
+
+console.log("App 시작");
+
+
+Amplify.configure({
+  Auth: {
+    Cognito:{
+      region: 'ap-northeast-2',
+      userPoolId: 'ap-northeast-2_fDjjYS7ZH',
+      userPoolClientId: '3llaurs0bbg33kf7pcd8ghl80',
+      authenticationFlowType: 'USER_PASSWORD_AUTH'
+    }
+  },
+});
+
 
 function App() {
   return (

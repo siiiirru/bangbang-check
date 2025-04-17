@@ -32,3 +32,7 @@ variable "stage_name" {
   type        = string
   description = "Deployment stage name"
 }
+
+variable "region" {
+  type = string
+}
