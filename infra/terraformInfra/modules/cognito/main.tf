@@ -10,18 +10,6 @@ resource "aws_cognito_user_pool" "this"{
     }
   }
 
-  schema {
-    name     = "email"
-    required = true
-    attribute_data_type = "String"
-    mutable = true
-  }
-  schema {
-    name     = "nickname"
-    required = true         # true로 하면 필수 항목
-    attribute_data_type = "String"
-    mutable  = true          # 나중에 변경 가능하게
-  }
   password_policy {
     require_uppercase = false  # 대문자 비활성화
     require_lowercase = false  # 소문자 비활성화
