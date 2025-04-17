@@ -26,6 +26,8 @@ resource "aws_cognito_user_pool" "this"{
     require_uppercase = false  # 대문자 비활성화
     require_lowercase = false  # 소문자 비활성화
     require_symbols = false  
+    minimum_length = 8
+    require_numbers = true
   }
   
 }
