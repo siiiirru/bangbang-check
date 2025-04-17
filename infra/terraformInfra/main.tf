@@ -58,3 +58,13 @@ module "cognito" {
 #   ]
 # }
 
+# module "api_gateway" {
+#     source               = "./modules/api_gateway"
+#     api_name             = "my-api"
+#     api_description      = "My API Gateway"
+#     authorizer_name      = "my-cognito-authorizer"
+#     cognito_user_pool_arn = module.cognito.user_pool_arn
+#     resource_path        = "hello"
+#     http_method          = "GET"
+#     stage_name           = "prod"
+# }
