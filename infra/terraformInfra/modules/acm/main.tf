@@ -20,8 +20,8 @@ resource "aws_acm_certificate" "apigw_cert" {
 }
 
 resource "aws_route53_record" "apigw_cert_validation" {
-    depends_on = [aws_acm_certificate.apigw_cert] 
-    name    = tolist(aws_acm_certificate.apigw_cert.domain_validation_options)[0].resource_record_name
+    depends_on = [aws_acm_certificate.apigw_cert]
+    name    = "${tolist(aws_acm_certificate.apigw_cert.domain_validation_options)[0].resource_record_name}-apigw"
     type    = tolist(aws_acm_certificate.apigw_cert.domain_validation_options)[0].resource_record_type
     zone_id = var.zone_id
     records = [tolist(aws_acm_certificate.apigw_cert.domain_validation_options)[0].resource_record_value]
@@ -51,7 +51,7 @@ resource "aws_acm_certificate" "cloudfront_cert" {
 
 resource "aws_route53_record" "cloudfront_cert_validation" {
     depends_on = [aws_acm_certificate.cloudfront_cert]
-    name    = tolist(aws_acm_certificate.cloudfront_cert.domain_validation_options)[0].resource_record_name
+    name    = "${tolist(aws_acm_certificate.cloudfront_cert.domain_validation_options)[0].resource_record_name}-cloudfront"
     type    = tolist(aws_acm_certificate.cloudfront_cert.domain_validation_options)[0].resource_record_type
     zone_id = var.zone_id
     records = [tolist(aws_acm_certificate.cloudfront_cert.domain_validation_options)[0].resource_record_value]
