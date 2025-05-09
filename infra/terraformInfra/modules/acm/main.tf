@@ -20,19 +20,27 @@ resource "aws_acm_certificate" "apigw_cert" {
 }
 
 resource "aws_route53_record" "apigw_cert_validation" {
-    depends_on = [aws_acm_certificate.apigw_cert]
-    name    = "${tolist(aws_acm_certificate.apigw_cert.domain_validation_options)[0].resource_record_name}-apigw"
-    type    = tolist(aws_acm_certificate.apigw_cert.domain_validation_options)[0].resource_record_type
-    zone_id = var.zone_id
-    records = [tolist(aws_acm_certificate.apigw_cert.domain_validation_options)[0].resource_record_value]
-    ttl     = 60
+    for_each = {
+        for dvo in aws_acm_certificate.apigw_cert.domain_validation_options : dvo.domain_name => {
+        name   = dvo.resource_record_name
+        record = dvo.resource_record_value
+        type   = dvo.resource_record_type
+        }
+    }
+
+    allow_overwrite = true
+    name            = each.value.name
+    records         = [each.value.record]
+    ttl             = 60
+    type            = each.value.type
+    zone_id         = var.zone_id
 }
 
 
 resource "aws_acm_certificate_validation" "apigw_cert_validation" {
     provider                = aws.seoul
     certificate_arn         = aws_acm_certificate.apigw_cert.arn
-    validation_record_fqdns = [aws_route53_record.apigw_cert_validation.fqdn]
+    validation_record_fqdns = [for record in aws_route53_record.apigw_cert_validation : record.fqdn]
 
     depends_on = [aws_route53_record.apigw_cert_validation]
 }
@@ -50,19 +58,27 @@ resource "aws_acm_certificate" "cloudfront_cert" {
 }
 
 resource "aws_route53_record" "cloudfront_cert_validation" {
-    depends_on = [aws_acm_certificate.cloudfront_cert]
-    name    = "${tolist(aws_acm_certificate.cloudfront_cert.domain_validation_options)[0].resource_record_name}-cloudfront"
-    type    = tolist(aws_acm_certificate.cloudfront_cert.domain_validation_options)[0].resource_record_type
-    zone_id = var.zone_id
-    records = [tolist(aws_acm_certificate.cloudfront_cert.domain_validation_options)[0].resource_record_value]
-    ttl     = 60
+    for_each = {
+        for dvo in aws_acm_certificate.loudfront_cert.domain_validation_options : dvo.domain_name => {
+        name   = dvo.resource_record_name
+        record = dvo.resource_record_value
+        type   = dvo.resource_record_type
+        }
+    }
+
+    allow_overwrite = true
+    name            = each.value.name
+    records         = [each.value.record]
+    ttl             = 60
+    type            = each.value.type
+    zone_id         = var.zone_id
 }
 
 
 resource "aws_acm_certificate_validation" "cloudfront_cert_validation" {
     provider                = aws.virginia
     certificate_arn         = aws_acm_certificate.cloudfront_cert.arn
-    validation_record_fqdns = [aws_route53_record.cloudfront_cert_validation.fqdn]
+    validation_record_fqdns = [for record in aws_route53_record.cloudfront_cert_validation : record.fqdn]
 
     depends_on = [aws_route53_record.cloudfront_cert_validation]
 }
