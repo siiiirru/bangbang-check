@@ -121,60 +121,22 @@ resource "aws_iam_role_policy" "allow_put_bucket_policy" {
   })
 }
 
-resource "aws_iam_role_policy" "github_actions_extra_permissions" {
-  name = "GitHubActionsExtraPermissions"
-  role = aws_iam_role.github_actions_role.name
+resource "aws_iam_role_policy_attachment" "route53_policy" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonRoute53FullAccess"
+}
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid    = "AllowACM",
-        Effect = "Allow",
-        Action = [
-          "acm:RequestCertificate",
-          "acm:DescribeCertificate",
-          "acm:ListCertificates",
-          "acm:DeleteCertificate",
-          "acm:ListTagsForCertificate"
-        ],
-        Resource = "*"
-      },
-      {
-        Sid    = "AllowCloudFrontOAC",
-        Effect = "Allow",
-        Action = [
-          "cloudfront:CreateOriginAccessControl",
-          "cloudfront:GetOriginAccessControl",
-          "cloudfront:UpdateOriginAccessControl",
-          "cloudfront:DeleteOriginAccessControl"
-        ],
-        Resource = "*"
-      },
-      {
-        Sid    = "AllowLogs",
-        Effect = "Allow",
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ],
-        Resource = "*"
-      },
-      {
-        Sid    = "AllowRoute53",
-        Effect = "Allow",
-        Action = [
-          "route53:CreateHostedZone",
-          "route53:GetHostedZone",
-          "route53:ChangeResourceRecordSets",
-          "route53:ListHostedZones",
-          "route53:ListResourceRecordSets",
-          "route53:GetChange",
-          "route53:ListTagsForResource"
-        ],
-        Resource = "*"
-      }
-    ]
-  })
+resource "aws_iam_role_policy_attachment" "acm_policy" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSCertificateManagerFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "cloudfront_policy" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudFrontFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "logs_policy" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }
