@@ -24,7 +24,7 @@ module "website_bucket" {
 
 module "cloudfront" {
     source = "./modules/cloudfront"
-    bucket_domain_name = module.website_bucket.bucket_website_domain_name
+    bucket_domain_name = module.website_bucket.bucket_regional_domain_name
     OAC_name = "bangbangcheck-cloudfront-OAC"
     s3_origin_id = "bangbang-check-s3-origin-id"
     acm_certificate_arn= module.acm.cloudfront_validation_arn
