@@ -32,6 +32,8 @@ resource "aws_acm_certificate_validation" "apigw_cert_validation" {
     provider                = aws.seoul
     certificate_arn         = aws_acm_certificate.apigw_cert.arn
     validation_record_fqdns = [aws_route53_record.apigw_cert_validation.fqdn]
+
+    depends_on = [aws_route53_record.apigw_cert_validation]
 }
 
 
@@ -59,4 +61,6 @@ resource "aws_acm_certificate_validation" "cloudfront_cert_validation" {
     provider                = aws.virginia
     certificate_arn         = aws_acm_certificate.cloudfront_cert.arn
     validation_record_fqdns = [aws_route53_record.cloudfront_cert_validation.fqdn]
+
+    depends_on = [aws_route53_record.cloudfront_cert_validation]
 }
