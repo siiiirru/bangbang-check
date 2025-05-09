@@ -47,7 +47,6 @@ module "image_bucket" {
 
 module "lambda_bucket" {
     source = "./modules/s3_bucket"
-
     bucket_name = "lambda-upload-bangbang-check-bucket"
     enable_website = false
     is_public = false

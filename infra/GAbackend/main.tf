@@ -135,7 +135,8 @@ resource "aws_iam_role_policy" "github_actions_extra_permissions" {
           "acm:RequestCertificate",
           "acm:DescribeCertificate",
           "acm:ListCertificates",
-          "acm:DeleteCertificate"
+          "acm:DeleteCertificate",
+          "acm:ListTagsForCertificate"
         ],
         Resource = "*"
       },
@@ -168,7 +169,8 @@ resource "aws_iam_role_policy" "github_actions_extra_permissions" {
           "route53:GetHostedZone",
           "route53:ChangeResourceRecordSets",
           "route53:ListHostedZones",
-          "route53:ListResourceRecordSets"
+          "route53:ListResourceRecordSets",
+          "route53:GetChange"
         ],
         Resource = "*"
       }
