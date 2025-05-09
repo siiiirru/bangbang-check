@@ -33,6 +33,7 @@ module "cloudfront" {
 
 module "image_bucket" {
     source = "./modules/s3_bucket"
+    
     bucket_name = "user-upload-bangbang-check-bucket"
     enable_website = false
     is_public = false
