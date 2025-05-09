@@ -22,7 +22,7 @@ resource "aws_cloudfront_distribution" "this" {
     restrictions {
         geo_restriction {
         restriction_type = "whitelist"
-        locations        = ["US", "CA", "GB", "DE"]
+        locations        = ["KR", "US", "CA", "GB", "DE"]
         }
     }
 
