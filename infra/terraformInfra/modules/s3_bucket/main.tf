@@ -3,17 +3,6 @@ resource "aws_s3_bucket" "this" {
   force_destroy = var.force_destroy
 }
 
-resource "aws_s3_bucket_website_configuration" "this"{
-  count = var.enable_website ? 1:0
-  bucket = aws_s3_bucket.this.id
-  index_document {
-    suffix = "index.html"
-  }
-  error_document {
-    key = var.error_document
-  }
-}
-
 resource "aws_s3_bucket_public_access_block" "this" {
   bucket = aws_s3_bucket.this.id
 
