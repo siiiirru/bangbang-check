@@ -32,7 +32,12 @@ export function SignupForm() {
     }
 
     try {
-      const response = await signUp({ username: email, password, attributes: { email, nickname } });
+      const response = await signUp({ username, password, options: {
+        userAttributes: {
+          email: email,
+          nickname: nickname
+        }
+      } });
       console.log(response)
       // 회원가입 완료 후 인증 코드 입력 폼 활성화
       setIsSignedUp(true)  // 회원가입 완료 상태로 변경
@@ -54,7 +59,8 @@ export function SignupForm() {
     setError("")
 
     try {
-      await confirmSignUp(email, verificationCode)  // 인증 코드 확인
+
+      await confirmSignUp({confirmationCode: verificationCode, username})  // 인증 코드 확인
       navigate("/login")  // 로그인 페이지로 이동
     } catch (error) {
       console.error("인증 코드 확인 오류:", error)

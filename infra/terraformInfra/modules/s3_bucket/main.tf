@@ -32,9 +32,16 @@ resource "aws_s3_bucket_policy" "website_policy" {
       {
         Sid       = "PublicReadGetObject",
         Effect    = "Allow",
-        Principal = "*",
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        },
         Action    = "s3:GetObject",
-        Resource  = "${aws_s3_bucket.this.arn}/*"
+        Resource  = "${aws_s3_bucket.this.arn}/*",
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = "${var.cloudfront_distribution_arn}"  # 변수로 주입
+          }
+        }
       },
       {
         Sid       = "GitHubActionsPutObject",

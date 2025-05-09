@@ -27,3 +27,9 @@ variable "tags" {
     Project = "bangbang-check"
   }
 }
+
+variable "cloudfront_distribution_arn" {
+  type = string
+  default = null
+  description = "배포하는 클라우드프론트 arn"
+}

@@ -1,7 +1,4 @@
-output "rest_api_id" {
-  value = aws_api_gateway_rest_api.this.id
-}
-
-output "invoke_url" {
-  value = "https://${aws_api_gateway_rest_api.this.id}.execute-api.${var.region}.amazonaws.com/${var.stage_name}"
+output "api_gateway_urls" {
+  description = "List of API Gateway URLs."
+  value       = aws_api_gateway_rest_api.this[*].invoke_url
 }
