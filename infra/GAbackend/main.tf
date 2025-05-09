@@ -120,3 +120,58 @@ resource "aws_iam_role_policy" "allow_put_bucket_policy" {
     ]
   })
 }
+
+resource "aws_iam_role_policy" "github_actions_extra_permissions" {
+  name = "GitHubActionsExtraPermissions"
+  role = aws_iam_role.github_actions_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "AllowACM",
+        Effect = "Allow",
+        Action = [
+          "acm:RequestCertificate",
+          "acm:DescribeCertificate",
+          "acm:ListCertificates",
+          "acm:DeleteCertificate"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowCloudFrontOAC",
+        Effect = "Allow",
+        Action = [
+          "cloudfront:CreateOriginAccessControl",
+          "cloudfront:GetOriginAccessControl",
+          "cloudfront:UpdateOriginAccessControl",
+          "cloudfront:DeleteOriginAccessControl"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowLogs",
+        Effect = "Allow",
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowRoute53",
+        Effect = "Allow",
+        Action = [
+          "route53:CreateHostedZone",
+          "route53:GetHostedZone",
+          "route53:ChangeResourceRecordSets",
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
