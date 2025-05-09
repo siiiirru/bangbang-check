@@ -14,11 +14,9 @@ resource "aws_cloudfront_distribution" "this" {
     default_cache_behavior {
         target_origin_id = var.s3_origin_id
         viewer_protocol_policy = "redirect-to-https"
+        cache_policy_id  = "2e54312d-136d-493c-8eb9-b001f22f67d2"
         allowed_methods = ["GET", "HEAD"]
         cached_methods = ["GET", "HEAD"]
-        default_ttl = 3600  # 1시간 동안 캐시
-        max_ttl     = 86400 # 1일 동안 캐시
-        min_ttl     = 60    # 최소 1분 동안 캐시
     }
 
     restrictions {
@@ -28,7 +26,7 @@ resource "aws_cloudfront_distribution" "this" {
         }
     }
 
-    price_class = "PriceClass_100" # 비용을 설정하려면 이 항목을 선택
+    price_class = "PriceClass_200" # 한국은 200에 있음
 
     # HTTPS를 위한 ACM 인증서 설정
     viewer_certificate {
