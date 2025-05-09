@@ -10,7 +10,6 @@ terraform {
 
 module "website_bucket" {
     source = "./modules/s3_bucket"
-
     bucket_name = var.project_name
     enable_website = true
     is_public = false # OAC 설정했기 때문에 퍼블릭 액세스 차단
@@ -25,7 +24,7 @@ module "website_bucket" {
 
 module "cloudfront" {
     source = "./modules/cloudfront"
-    bucket_domain_name = module.website_bucket.bucket_domain_name
+    bucket_domain_name = module.website_bucket.bucket_regional_domain_name
     OAC_name = "bangbangcheck-cloudfront-OAC"
     s3_origin_id = "bangbang-check-s3-origin-id"
     acm_certificate_arn= module.acm.cloudfront_validation_arn
@@ -33,7 +32,6 @@ module "cloudfront" {
 
 module "image_bucket" {
     source = "./modules/s3_bucket"
-    
     bucket_name = "user-upload-bangbang-check-bucket"
     enable_website = false
     is_public = false
