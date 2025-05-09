@@ -33,6 +33,19 @@ resource "aws_cloudfront_distribution" "this" {
         acm_certificate_arn = var.acm_certificate_arn  # ACM 인증서 ARN
         ssl_support_method  = "sni-only"  # SNI(Secure Name Indication) 방식 사용
     }
+
+        # 오류 페이지 리디렉션 설정 (404 및 403 오류 시 index.html로 리디렉션)
+    custom_error_response {
+        error_code            = 404
+        response_code         = 200
+        response_page_path    = "/index.html"
+    }
+
+    custom_error_response {
+        error_code            = 403
+        response_code         = 200
+        response_page_path    = "/index.html"
+    }
 }
 
 # OAC 설정 (s3버킷은 클라우드 프론트로만 접속 가능)
