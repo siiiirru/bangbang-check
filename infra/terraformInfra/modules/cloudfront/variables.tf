@@ -15,3 +15,8 @@ variable "acm_certificate_arn" {
     type = string
     description = "Https 연결을 위한 acm 인증서 arn"
 }
+
+variable "custom_domain_name" {
+    type = string
+    description = "route53에서 설정한 cloudfront 도메인 이름"
+}

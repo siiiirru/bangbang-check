@@ -28,6 +28,7 @@ module "cloudfront" {
     OAC_name = "bangbangcheck-cloudfront-OAC"
     s3_origin_id = "bangbang-check-s3-origin-id"
     acm_certificate_arn= module.acm.cloudfront_validation_arn
+    custom_domain_name = "www.bangbang-check.com"
 }
 
 module "image_bucket" {

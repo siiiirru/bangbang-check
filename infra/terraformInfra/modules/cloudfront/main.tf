@@ -4,7 +4,7 @@ resource "aws_cloudfront_distribution" "this" {
         origin_id   = var.s3_origin_id
         origin_access_control_id = aws_cloudfront_origin_access_control.this.id # OAC 설정
     }
-
+    aliases = [var.custom_domain_name]
     enabled             = true
     is_ipv6_enabled     = true
     comment             = "CloudFront distribution for frontend"
