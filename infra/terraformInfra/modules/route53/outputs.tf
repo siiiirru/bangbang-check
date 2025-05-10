@@ -3,9 +3,9 @@ output "zone_id" {
   value       = aws_route53_zone.this.id
 }
 
-output "a_record" {
+output "cloudfront_record" {
   description = "The A record details"
-  value       = aws_route53_record.a_record
+  value       = aws_route53_record.cloudfront_record
 }
 
 # output "cname_record" {

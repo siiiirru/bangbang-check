@@ -68,10 +68,10 @@ module "cognito" {
 
 module "route53" {
     source = "./modules/route53"
-
     domain_name       = "bangbang-check.com"
     subdomain         = "www"
-    a_record_values   = [module.cloudfront.domain_name]
+    cloudfront_domain_name   = module.cloudfront.domain_name
+    cloudfront_hosted_zone_id = module.cloudfront.hosted_zone_id
     # cname_subdomain   = "blog"
     # cname_record_values = ["example.com"]
 }
