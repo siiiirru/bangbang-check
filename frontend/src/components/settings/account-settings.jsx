@@ -9,6 +9,9 @@ import { User, Lock, Check } from "lucide-react"
 export function AccountSettings() {
   const [isEditingNickname, setIsEditingNickname] = useState(false)
   const [isEditingPassword, setIsEditingPassword] = useState(false)
+  const [email, setEmail] = useState("user@example.com") // 초기 이메일
+  const [newEmail, setNewEmail] = useState("")
+  const [isEditingEmail, setIsEditingEmail] = useState(false)
   const [nickname, setNickname] = useState("사용자")
   const [newNickname, setNewNickname] = useState("")
   const [currentPassword, setCurrentPassword] = useState("")
@@ -85,6 +88,27 @@ export function AccountSettings() {
     setError("")
   }
 
+  const handleEmailEdit = () => {
+    setIsEditingEmail(true)
+    setNewEmail(email)
+    setError("")
+    setSuccess("")
+  }
+  
+  const handleEmailSave = () => {
+    if (!newEmail || !newEmail.includes("@")) {
+      setErrorWithTimeout("유효한 이메일을 입력해주세요.")
+      return
+    }
+  
+    // 실제 구현에서는 API 요청 필요
+    setEmail(newEmail)
+    setIsEditingEmail(false)
+    setSuccess("이메일이 성공적으로 변경되었습니다.")
+    setTimeout(() => setSuccess(""), 3000)
+  }
+  
+
   return (
     <div className="space-y-6">
       {success && (
@@ -107,7 +131,7 @@ export function AccountSettings() {
           </div>
           {!isEditingNickname && (
             <Button onClick={handleNicknameEdit} variant="outline" size="sm" className="text-gray-700">
-              수정
+              변경
             </Button>
           )}
         </div>
@@ -136,6 +160,48 @@ export function AccountSettings() {
         ) : (
           <div className="p-3 bg-muted rounded-md">
             <span className="font-medium text-gray-700">{nickname}</span>
+          </div>
+        )}
+      </div>
+      {/* 이메일 변경 */}
+      <div className="space-y-4 pt-4 border-t border-border">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <User size={18} className="text-purple-600 dark:text-purple-400" />
+            <h4 className="font-medium text-gray-700">이메일 변경</h4>
+          </div>
+          {!isEditingEmail && (
+            <Button onClick={handleEmailEdit} variant="outline" size="sm" className="text-gray-700">
+              변경
+            </Button>
+          )}
+        </div>
+
+        {isEditingEmail ? (
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="email" className="text-purple-600">새 이메일</Label>
+              <Input
+                id="email"
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="새 이메일 주소를 입력하세요"
+                className="text-gray-700"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" size="sm" onClick={handleCancel} className="text-gray-700">
+                취소
+              </Button>
+              <Button size="sm" onClick={handleEmailSave} className="bg-purple-600 hover:bg-purple-700">
+                저장
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="p-3 bg-muted rounded-md">
+            <span className="font-medium text-gray-700">{email}</span>
           </div>
         )}
       </div>

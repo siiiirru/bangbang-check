@@ -5,15 +5,18 @@ import { Label } from "../ui/label"
 import { Separator } from "../ui/separator"
 import { Facebook } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { API_BASE_URL } from "../../config"
+import { signUp, confirmSignUp } from 'aws-amplify/auth'
 
 export function SignupForm() {
   const [isLoading, setIsLoading] = useState(false)
-  const [userId, setUserId] = useState("")
+  const [username, setUsername] = useState("")
   const [nickname, setNickname] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [email, setEmail] = useState("")
   const [error, setError] = useState("")
+  const [verificationCode, setVerificationCode] = useState("")  // 인증 코드 상태 추가
+  const [isSignedUp, setIsSignedUp] = useState(false)  // 회원가입 완료 여부
   const navigate = useNavigate()
 
   async function onSubmit(event) {
@@ -29,26 +32,39 @@ export function SignupForm() {
     }
 
     try {
-      // AWS Lambda API 호출
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId, nickname, password }),
-      })
+      const response = await signUp({ username, password, options: {
+        userAttributes: {
+          email: email,
+          nickname: nickname
+        }
+      } });
+      console.log(response)
+      // 회원가입 완료 후 인증 코드 입력 폼 활성화
+      setIsSignedUp(true)  // 회원가입 완료 상태로 변경
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || "회원가입에 실패했습니다.")
-      }
-
-      // 회원가입 성공 시 로그인 페이지로 이동
-      navigate("/login")
     } catch (error) {
-      console.error("회원가입 오류:", error)
+      if (error.name === "UsernameExistsException") {
+        setError("이미 등록된 ID입니다.");
+      }
       setError(error.message || "회원가입 중 오류가 발생했습니다.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  async function onConfirmSignUp(event) {
+    event.preventDefault()
+
+    setIsLoading(true)
+    setError("")
+
+    try {
+
+      await confirmSignUp({confirmationCode: verificationCode, username})  // 인증 코드 확인
+      navigate("/login")  // 로그인 페이지로 이동
+    } catch (error) {
+      console.error("인증 코드 확인 오류:", error)
+      setError(error.message || "인증 코드 확인 중 오류가 발생했습니다.")
     } finally {
       setIsLoading(false)
     }
@@ -57,15 +73,36 @@ export function SignupForm() {
   return (
     <div className="grid gap-6">
       {error && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{error}</div>}
+      {!isSignedUp?(
       <form onSubmit={onSubmit}>
         <div className="grid gap-4">
+        <div className="grid gap-2">
+            <div className="flex items-center gap-4">
+              <Label htmlFor="email" className="w-24 text-left text-slate-950">
+                이메일:
+              </Label>
+              <Input
+                id="email"
+                placeholder="이메일을 입력하세요"
+                type="email"
+                autoCapitalize="none"
+                autoComplete="email"
+                autoCorrect="off"
+                className="text-black"
+                disabled={isLoading}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+          </div>
           <div className="grid gap-2">
             <div className="flex items-center gap-4">
               <Label htmlFor="userId" className="w-24 text-left text-slate-950">
                 아이디:
               </Label>
               <Input
-                id="userId"
+                id="username"
                 placeholder="아이디를 입력하세요"
                 type="text"
                 autoCapitalize="none"
@@ -73,8 +110,8 @@ export function SignupForm() {
                 autoCorrect="off"
                 className="text-black"
                 disabled={isLoading}
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
@@ -145,6 +182,33 @@ export function SignupForm() {
           </Button>
         </div>
       </form>
+      ):(
+        // 이메일 인증 코드 입력 폼
+        <form onSubmit={onConfirmSignUp}>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <div className="flex items-center gap-4">
+                <Label htmlFor="verificationCode" className="w-32 text-left text-slate-950">인증 코드:</Label>
+                <Input
+                  id="verificationCode"
+                  placeholder="이메일로 받은 인증 코드를 입력하세요"
+                  type="text"
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  className="text-black"
+                  disabled={isLoading}
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <Button className="bg-teal-600 hover:bg-teal-700" disabled={isLoading}>
+              {isLoading ? "인증 중..." : "인증 완료"}
+            </Button>
+          </div>
+        </form>
+      )}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <Separator />

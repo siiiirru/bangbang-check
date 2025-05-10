@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { Skeleton } from "../ui/skeleton"
 import { Button } from "../ui/button"
 import { Check } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger} from "../ui/select"
 
 export function RankingList({ rankings, isLoading, allRooms, onUpdateRanking }) {
   const [selectedRooms, setSelectedRooms] = useState({})
@@ -70,11 +70,11 @@ export function RankingList({ rankings, isLoading, allRooms, onUpdateRanking }) 
                   onValueChange={(value) => handleRoomSelect(position, value)} 
                 >
                   <SelectTrigger className="w-full text-gray-700">
-                    <SelectValue placeholder="방 선택" className="text-gray-700" />
+                    {allRooms.find((r) => r.id === selectedRooms[position])?.name || "방 선택"}
                   </SelectTrigger>
-                  <SelectContent >
+                  <SelectContent className="w-full max-w-sm">
                     {allRooms.map((room) => (
-                      <SelectItem key={room.id} value={room.id} className="text-gray-700">
+                      <SelectItem key={room.id} value={room.id} className=" text-gray-700">
                         {room.name}
                       </SelectItem>
                     ))}

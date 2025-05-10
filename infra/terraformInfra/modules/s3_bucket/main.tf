@@ -3,17 +3,6 @@ resource "aws_s3_bucket" "this" {
   force_destroy = var.force_destroy
 }
 
-resource "aws_s3_bucket_website_configuration" "this"{
-  count = var.enable_website ? 1:0
-  bucket = aws_s3_bucket.this.id
-  index_document {
-    suffix = "index.html"
-  }
-  error_document {
-    key = var.error_document
-  }
-}
-
 resource "aws_s3_bucket_public_access_block" "this" {
   bucket = aws_s3_bucket.this.id
 
@@ -32,9 +21,16 @@ resource "aws_s3_bucket_policy" "website_policy" {
       {
         Sid       = "PublicReadGetObject",
         Effect    = "Allow",
-        Principal = "*",
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        },
         Action    = "s3:GetObject",
-        Resource  = "${aws_s3_bucket.this.arn}/*"
+        Resource  = "${aws_s3_bucket.this.arn}/*",
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = "${var.cloudfront_distribution_arn}"  # 변수로 주입
+          }
+        }
       },
       {
         Sid       = "GitHubActionsPutObject",

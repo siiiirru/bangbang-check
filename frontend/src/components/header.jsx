@@ -3,7 +3,8 @@ import { Link } from "react-router-dom"
 import { Button } from "./ui/button";
 import { ArrowLeft, Settings, LogOut } from "lucide-react";
 import { useAuth } from "../context/AuthContext"; // useAuth를 import
-
+import { signOut } from 'aws-amplify/auth'
+import { useNavigate } from 'react-router-dom';
 export function Logo() {
     return (
         <Link to="/" className="flex items-center gap-2 justify-center mt-5">
@@ -15,10 +16,20 @@ export function Logo() {
 
 export const LogoutButton = () => {
   const { isLoggedIn, setIsLoggedIn } = useAuth(); // useAuth를 사용해 상태 가져오기
-
-  const handleLogout = () => {
-    localStorage.removeItem('user'); // 로그인 정보 제거
-    setIsLoggedIn(false); // 상태 업데이트
+  const navigate = useNavigate()
+  
+  const handleLogout =async() => {
+    try {
+        await signOut(); // Cognito 세션 로그아웃
+    
+        // 클라이언트 상태 초기화
+        localStorage.removeItem("user");
+        setIsLoggedIn(false);
+    
+        navigate("/");
+      } catch (error) {
+        console.error("로그아웃 실패:", error);
+      }
   };
 
   return (
