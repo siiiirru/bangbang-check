@@ -51,6 +51,9 @@ resource "aws_acm_certificate" "cloudfront_cert" {
     provider          = aws.virginia
     domain_name       = var.domain_name
     validation_method = "DNS"
+    subject_alternative_names = [
+        "www.bangbang-check.com"
+    ] 
 
     lifecycle {
         create_before_destroy = true
