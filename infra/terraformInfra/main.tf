@@ -70,8 +70,8 @@ module "route53" {
     source = "./modules/route53"
 
     domain_name       = "bangbang-check.com"
-    # subdomain         = "www"
-    # a_record_values   = ["192.0.2.1"]
+    subdomain         = "www"
+    a_record_values   = [module.cloudfront.domain_name]
     # cname_subdomain   = "blog"
     # cname_record_values = ["example.com"]
 }

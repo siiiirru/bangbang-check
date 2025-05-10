@@ -3,10 +3,10 @@ output "zone_id" {
   value       = aws_route53_zone.this.id
 }
 
-# output "a_record" {
-#   description = "The A record details"
-#   value       = aws_route53_record.a_record
-# }
+output "a_record" {
+  description = "The A record details"
+  value       = aws_route53_record.a_record
+}
 
 # output "cname_record" {
 #   description = "The CNAME record details"
