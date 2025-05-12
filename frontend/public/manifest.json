@@ -1,0 +1,27 @@
+{
+    "name": "방방체크",
+    "short_name": "방방체크",
+    "description": "원하는 조건에 맞는 방을 쉽고 빠르게 찾아보세요",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#d946ef",
+    "icons": [
+      {
+        "src": "/favicon.ico",
+        "sizes": "any",
+        "type": "image/x-icon"
+      },
+      {
+        "src": "/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
+  
