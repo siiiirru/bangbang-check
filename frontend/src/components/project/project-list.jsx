@@ -1,15 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ProjectCard } from "../project/project-card"
 import { AddProjectModal } from "../project/add-project-modal"
 import { Button } from "../ui/button"
 import { Plus, Trash2, Share2 } from "lucide-react"
+import { Auth } from 'aws-amplify'
 import { projectsData } from "../../mock/data"
+import axios from "axios";
+import {getAuthHeaders,API_BASE_URL} from "../../services/apiServices"
 
 export function ProjectList() {
   // 프로젝트 목록 상태 - 목 데이터 사용
-  const [projects, setProjects] = useState(projectsData)
+  const [projects, setProjects] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
   // 모달 상태
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -21,6 +25,35 @@ export function ProjectList() {
   // 공유 모드 상태
   const [isShareMode, setIsShareMode] = useState(false)
   const [selectedForShare, setSelectedForShare] = useState(null)
+
+  // 프로젝트 목록 가져오기
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+      const headers = await getAuthHeaders();  // 공통 헤더 가져오기
+      const user = JSON.parse(localStorage.getItem("user"));
+      const username = user?.username;
+      const response = await axios.get(`${API_BASE_URL}/projects`, {
+        headers,
+        params: {
+            username: username, // 쿼리 파라미터
+          }
+      });
+
+        setProjects(response.data)
+      } catch (error) {
+        console.error("프로젝트를 불러오는 중 오류 발생:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchProjects()
+  }, [])
+
+    if (isLoading) {
+    return <div>로딩 중...</div>;
+  }
+
 
   // 프로젝트 추가 핸들러
   const handleAddProject = (name) => {

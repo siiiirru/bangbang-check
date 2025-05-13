@@ -3,6 +3,7 @@ resource "aws_iam_role" "this" {
     assume_role_policy = data.aws_iam_policy_document.assume.json
 }
 
+# Lambda가 이 역할을 사용할 수 있도록 허용하는 정책
 data "aws_iam_policy_document" "assume" {
     statement {
         actions = ["sts:AssumeRole"]

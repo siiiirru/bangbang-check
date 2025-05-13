@@ -1,0 +1,90 @@
+name: lambda
+
+on:
+  push:
+    branches: [ "dev" ]
+    paths:
+      - "backend/**"
+  pull_request:
+    branches: [ "dev" ]
+    paths:
+      - "backend/**"
+
+env:
+  AWS_REGION: ap-northeast-2  # AWS 리전 설정
+  AWS_S3_BUCKET: lambda-upload-bangbang-check-bucket
+
+permissions:
+  id-token: write      # OIDC 토큰을 가져올 수 있도록 허용
+  contents: read  # 코드 읽기 권한만 부여
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Run tests 
+      run: |
+        if [ -f package.json ]; then
+          npm install
+        fi
+        if [ -f backend/lambda_tests/runAllTests.js ]; then
+          echo "Running tests for changed Lambda functions"
+          npm install
+          npm test
+        else
+          echo "No runAllTests.js found, skipping tests."
+        fi
+
+    - name: Detect changed Lambda function folders
+      id: detect
+      run: |
+        echo "CHANGED_DIRS=$(git diff --name-only origin/main | grep '^backend/lambda_functions/' | awk -F'/' '{print $3}' | sort -u | uniq | tr '\n' ' ')" >> $GITHUB_ENV
+
+    - name: npm install changed functions
+      run: |
+        for dir in $CHANGED_DIRS; do
+          if [ -d "$dir" ] && [ -f "$dir/package.json" ]; then
+            echo "Installing dependencies for $dir"
+            cd backend/lambda_functions/$dir
+            cd $dir
+            npm install
+            cd -
+          fi
+        done
+
+    # AWS 자격 증명 설정 (깃허브 OIDC 사용)
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::418295688903:role/GitHubActionsOIDCRole 
+        role-session-name: GitHub_to_AWS_via_FederatedOIDC 
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Zip and upload to S3
+      run: |
+        for dir in $CHANGED_DIRS; do
+          echo "Zipping and uploading $dir"
+          cd backend/lambda_functions/$dir
+          zip -r /tmp/$dir.zip . -x "*.md" "*.zip"
+          aws s3 cp /tmp/$dir.zip s3://${{ env.AWS_S3_BUCKET }}/$dir.zip
+          cd -
+        done
+
+    - name: Deploy to Lambda
+      run: |
+        for dir in $CHANGED_DIRS; do
+          echo "Deploying $dir"
+          aws lambda update-function-code \
+            --function-name $dir \
+            --s3-bucket your-bucket \
+            --s3-key $dir.zip
+        done

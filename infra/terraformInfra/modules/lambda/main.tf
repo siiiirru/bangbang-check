@@ -5,7 +5,7 @@ resource "aws_lambda_function" "this" {
   runtime       = var.lambda_functions[count.index].runtime
 
   s3_bucket = var.lambda_s3_bucket
-  s3_key    = var.lambda_s3_key
+  s3_key    = "${var.lambda_functions[count.index].name}.zip"
   role      = var.lambda_functions[count.index].role_arn
   
   environment {

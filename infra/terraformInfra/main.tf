@@ -73,8 +73,9 @@ module "route53" {
     subdomain         = "www"
     cloudfront_domain_name   = module.cloudfront.domain_name
     cloudfront_hosted_zone_id = module.cloudfront.hosted_zone_id
-    # cname_subdomain   = "blog"
-    # cname_record_values = ["example.com"]
+    api_gateway_subdomain   = "api"
+    api_gateway_regional_zone_id = module.api_gateway_regional_zone_id
+    api_gateway_regional_domain_name = module.api_gateway.api_gateway_regional_domain_name
 }
 
 #Https를 위한 인증서(apigw, cloudfront용으로 두 개 생성)
@@ -97,12 +98,11 @@ module "acm" {
 # }
 
 # module "lambda" {
-#   source = "./lambda_module"
+#     source = "./lambda_module"
 
-#   lambda_functions = var.lambda_functions
+#     lambda_functions = var.lambda_functions
 
-#   lambda_s3_bucket = "your-lambda-code-bucket"
-#   lambda_s3_key    = "your-lambda-code.zip"
+#     lambda_s3_bucket = "lambda-upload-bangbang-check-bucket" # .zip파일 저장된 버킷 이름
 # }
 
 module "cloudwatch_logs" {
@@ -114,11 +114,13 @@ module "cloudwatch_logs" {
 # module "api_gateway" {
 #     source = "./api_gateway_module"
 
+#     custom_domain_name = "api.bangbang-check.com"
+
 #     lambda_functions = [
-#     for lambda in var.lambda_functions : {
+#     for i,lambda in var.lambda_functions : {
 #         name                = lambda.name
-#         api_resource_path   = lambda.api_resource_path != "" ? lambda.api_resource_path : ""
-#         arn                 = lambda.role_arn
+#         api_resource_path   = lambda.api_resource_path
+#         arn                 = module.lambda.lambda_function_arns[i]
 #         http_method         = lambda.http_method
 #         }
 #     ]
@@ -130,10 +132,19 @@ module "cloudwatch_logs" {
 #     acm_certificate_arn = module.acm.apigw_validation_arn
 # }
 
-# module "default_lambda_role" {
-#     source = "./modules/iam_role"
-#     name   = "default-lambda-role"
-#     policy_arns = [
-#         "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-#     ]
-# }
+module "default_lambda_role" {
+    source = "./modules/iam_role"
+    name   = "default-lambda-role"
+    policy_arns = [
+        "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+    ]
+}
+
+module "dynamodb_lambda_role" {
+    source = "./modules/iam_role"
+    name   = "default-lambda-role"
+    policy_arns = [
+        "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+        "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+    ]
+}

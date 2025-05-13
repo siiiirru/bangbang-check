@@ -16,13 +16,17 @@ resource "aws_route53_record" "cloudfront_record" {
 }
 
 #API GW와 연결
-# resource "aws_route53_record" "cname_record" {
-#   zone_id = aws_route53_zone.this.id
-#   name    = var.cname_subdomain
-#   type    = "CNAME"
-#   ttl     = 300
-#   records = var.cname_record_values
-# }
+resource "aws_route53_record" "api_gateway_record" {
+  zone_id = aws_route53_zone.this.id
+  name    = var.api_gateway_subdomain
+  type    = "A"
+  ttl     = 300
+  alias {
+    name                   = var.api_gateway_regional_domain_name
+    zone_id                = var.api_gateway_regional_zone_id
+    evaluate_target_health = false
+  }
+}
 
 
 # 필요한 경우 추가적인 레코드 설정

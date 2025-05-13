@@ -25,7 +25,7 @@ resource "aws_api_gateway_base_path_mapping" "this" {
   api_id      = aws_api_gateway_rest_api.this[count.index].id
   stage_name  = "prod"
   domain_name = aws_api_gateway_domain_name.this.domain_name
-  base_path   = var.lambda_functions[count.index].api_resource_path  # 각 API에 맞는 경로 설정
+  base_path   = "" #커스텀 도메인을 API Gateway의 루트 경로(/)에 매핑
 }
 
 # REST API 인증기
@@ -82,12 +82,12 @@ resource "aws_api_gateway_stage" "this" {
 
   depends_on = [aws_api_gateway_integration.this]
 
-  # Canary settings
-  canary_settings {
-    percent_traffic = 10  # 카나리아 배포에 보낼 트래픽 비율 (예: 10%는 카나리아)
-    deployment_id           = aws_api_gateway_deployment.this[count.index].id
-    use_stage_cache = true  # 캐시 사용 여부
-  }
+  # # Canary settings
+  # canary_settings {
+  #   deployment_id = 
+  #   percent_traffic = 10  # 카나리아 배포에 보낼 트래픽 비율 (예: 10%는 카나리아)
+  #   use_stage_cache = true  # 캐시 사용 여부
+  # }
 
   # Optional: 로그 커스터마이징 및 다른 스테이지 설정
   access_log_settings {
