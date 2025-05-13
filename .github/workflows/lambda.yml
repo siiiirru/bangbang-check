@@ -25,6 +25,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    # 바뀐파일 비교를 위해 fetch
+    - name: Fetch dev branch
+      run: git fetch origin dev
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
