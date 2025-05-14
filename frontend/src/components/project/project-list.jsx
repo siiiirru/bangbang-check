@@ -5,7 +5,6 @@ import { ProjectCard } from "../project/project-card"
 import { AddProjectModal } from "../project/add-project-modal"
 import { Button } from "../ui/button"
 import { Plus, Trash2, Share2 } from "lucide-react"
-import { Auth } from 'aws-amplify'
 import { projectsData } from "../../mock/data"
 import axios from "axios";
 import {getAuthHeaders,API_BASE_URL} from "../../services/apiServices"

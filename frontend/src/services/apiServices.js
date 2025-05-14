@@ -1,13 +1,13 @@
 // src/services/authService.js
-import { Auth } from "aws-amplify";
+import { fetchAuthSession } from 'aws-amplify/auth';
 
 export const API_BASE_URL = "https://api.bangbang-check.com";
 
 // 세션과 인증 헤더를 가져오는 함수
 export const getAuthHeaders = async () => {
     try {
-        const session = await Auth.currentSession();
-        const accessToken = session.getAccessToken().getJwtToken();
+        const session = await fetchAuthSession();
+        const accessToken = session.tokens?.accessToken?.toString();
 
         return {
         Authorization: `Bearer ${accessToken}`,

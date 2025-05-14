@@ -85,12 +85,12 @@ jobs:
           cd -
         done
 
-    - name: Deploy to Lambda
-      run: |
-        for dir in $CHANGED_DIRS; do
-          echo "Deploying $dir"
-          aws lambda update-function-code \
-            --function-name $dir \
-            --s3-bucket your-bucket \
-            --s3-key $dir.zip
-        done
+    # - name: Deploy to Lambda
+    #   run: |
+    #     for dir in $CHANGED_DIRS; do
+    #       echo "Deploying $dir"
+    #       aws lambda update-function-code \
+    #         --function-name $dir \
+    #         --s3-bucket your-bucket \
+    #         --s3-key $dir.zip
+    #     done
