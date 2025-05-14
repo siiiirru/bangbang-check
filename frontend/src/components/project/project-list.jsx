@@ -30,6 +30,7 @@ export function ProjectList() {
       try {
       const headers = await getAuthHeaders();  // 공통 헤더 가져오기
       const username = localStorage.getItem("user");
+      console.log("Stored username:", username);
       const response = await axios.get(`${API_BASE_URL}/projects`, {
         headers,
         params: {
