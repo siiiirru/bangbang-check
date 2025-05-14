@@ -15,7 +15,7 @@ exports.handler = async (event) => {
 
     // 쿼리 파라미터에서 'username' 값을 가져오기
     const username = queryParams ? queryParams.username : null;
-    console.log("User name: ",username); // 로그에 출력
+    console.log("User name:",username); // 로그에 출력
 
 
     const projectsData = [

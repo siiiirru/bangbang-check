@@ -53,7 +53,7 @@ jobs:
     - name: Detect changed Lambda function folders
       id: detect
       run: |
-        echo "CHANGED_DIRS=$(git diff --name-only origin/dev | grep '^backend/lambda_functions/' | awk -F'/' '{print $3}' | sort -u | uniq | tr '\n' ' ')" >> $GITHUB_ENV
+        echo "CHANGED_DIRS=$(git diff --name-only origin/dev...HEAD | grep '^backend/lambda_functions/' | awk -F'/' '{print $3}' | sort -u | uniq | tr '\n' ' ')" >> $GITHUB_ENV
 
     - name: npm install changed functions
       run: |

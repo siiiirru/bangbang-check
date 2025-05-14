@@ -1,5 +1,5 @@
 output "api_gateway_urls" {
-  value       = aws_api_gateway_rest_api.this[*].invoke_url
+  value       = aws_api_gateway_deployment.this[*].invoke_url
   description = "List of API Gateway URLs."
   sensitive = true
 }

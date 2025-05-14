@@ -11,7 +11,7 @@ provider "aws" {
 # 서울 리전 (API Gateway용 인증서)
 resource "aws_acm_certificate" "apigw_cert" {
     provider          = aws.seoul
-    domain_name       = var.domain_name
+    domain_name       = var.apigw_domain_name
     validation_method = "DNS"
 
     lifecycle {
