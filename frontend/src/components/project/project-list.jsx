@@ -33,6 +33,7 @@ export function ProjectList() {
 
        // 1. 먼저 OPTIONS 요청을 보내서 CORS를 처리
       await axios.options(`${API_BASE_URL}/projects`, {
+          headers,
           params: {
               username: username, // 쿼리 파라미터
           }
