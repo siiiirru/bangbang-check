@@ -9,7 +9,7 @@ import axios from "axios";
 import {getAuthHeaders,API_BASE_URL} from "../../services/apiServices"
 
 export function ProjectList() {
-  // 프로젝트 목록 상태 - 목 데이터 사용
+  // 프로젝트 목록 상태 
   const [projects, setProjects] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -29,8 +29,7 @@ export function ProjectList() {
     const fetchProjects = async () => {
       try {
       const headers = await getAuthHeaders();  // 공통 헤더 가져오기
-      const user = JSON.parse(localStorage.getItem("user"));
-      const username = user?.username;
+      const username = localStorage.getItem("user");
       const response = await axios.get(`${API_BASE_URL}/projects`, {
         headers,
         params: {
