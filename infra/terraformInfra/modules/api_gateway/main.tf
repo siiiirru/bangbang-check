@@ -145,6 +145,78 @@ resource "aws_api_gateway_account" "this" {
   cloudwatch_role_arn = aws_iam_role.apigateway_cloudwatch_logs_role.arn
 }
 
+# OPTIONS 메서드 추가
+resource "aws_api_gateway_method" "options" {
+  count         = length(var.lambda_functions)
+  rest_api_id   = aws_api_gateway_rest_api.this[count.index].id
+  resource_id   = aws_api_gateway_resource.this[count.index].id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+# MOCK 통합 (Lambda가 아닌 내부 Mock)
+resource "aws_api_gateway_integration" "options" {
+  count                     = length(var.lambda_functions)
+  rest_api_id               = aws_api_gateway_rest_api.this[count.index].id
+  resource_id               = aws_api_gateway_resource.this[count.index].id
+  http_method               = aws_api_gateway_method.options[count.index].http_method
+  type                      = "MOCK"
+  integration_http_method   = "OPTIONS"
+
+  request_templates = {
+    "application/json" = <<EOF
+{
+  "statusCode": 200
+}
+EOF
+  }
+}
+
+# 응답 정의
+resource "aws_api_gateway_method_response" "options" {
+  count       = length(var.lambda_functions)
+  rest_api_id = aws_api_gateway_rest_api.this[count.index].id
+  resource_id = aws_api_gateway_resource.this[count.index].id
+  http_method = "OPTIONS"
+  status_code = "200"
+
+  depends_on = [
+    aws_api_gateway_method.options
+  ]
+
+  response_models = {
+    "application/json" = "Empty"
+  }
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+# OPTIONS 요청의 응답 헤더
+resource "aws_api_gateway_integration_response" "options" {
+  count       = length(var.lambda_functions)
+  rest_api_id = aws_api_gateway_rest_api.this[count.index].id
+  resource_id = aws_api_gateway_resource.this[count.index].id
+  http_method = "OPTIONS"
+  status_code = "200"
+
+  depends_on = [
+    aws_api_gateway_integration.options
+  ]
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Authorization,Content-Type'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS'" # 필요에 따라 수정
+    "method.response.header.Access-Control-Allow-Origin"  = "'https://www.bangbang-check.com'"
+  }
+
+  response_templates = {
+    "application/json" = ""
+  }
+}
 
 
 # 프라이빗 API일 경우에만 VPC 엔드포인트와 VPC 링크 생성
