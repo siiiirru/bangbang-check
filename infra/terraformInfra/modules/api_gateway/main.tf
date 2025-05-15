@@ -71,11 +71,11 @@ resource "aws_api_gateway_integration" "this" {
 resource "aws_api_gateway_deployment" "this" {
   count        = length(var.lambda_functions)
   rest_api_id  = aws_api_gateway_rest_api.this[count.index].id
-  # depends_on   = [
-  #   aws_api_gateway_integration.this,
-  #   aws_api_gateway_method_response.options,
-  #   aws_api_gateway_integration_response.options
-  # ]
+  depends_on   = [
+    aws_api_gateway_integration.this,
+    aws_api_gateway_method_response.options,
+    aws_api_gateway_integration_response.options
+  ]
   # 변경사항 있으면 자동배포
   triggers = {
     redeployment = sha1(jsonencode({
