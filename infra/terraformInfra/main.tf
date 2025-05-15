@@ -73,8 +73,9 @@ module "route53" {
     subdomain         = "www"
     cloudfront_domain_name   = module.cloudfront.domain_name
     cloudfront_hosted_zone_id = module.cloudfront.hosted_zone_id
-    # cname_subdomain   = "blog"
-    # cname_record_values = ["example.com"]
+    api_gateway_subdomain   = "api"
+    api_gateway_regional_zone_id = module.api_gateway.api_gateway_regional_zone_id
+    api_gateway_regional_domain_name = module.api_gateway.api_gateway_regional_domain_name
 }
 
 #Https를 위한 인증서(apigw, cloudfront용으로 두 개 생성)
@@ -82,28 +83,43 @@ module "acm" {
     source = "./modules/acm"
 
     domain_name = "bangbang-check.com"
+    apigw_domain_name = "api.bangbang-check.com"
     zone_id = module.route53.zone_id
 }
 
 # module "user_table" {
-#   source     = "./modules/dynamodb"
-#   table_name = "users"
-#   hash_key   = "username"
+#     source     = "./modules/dynamodb"
+#     table_name = "users"
+#     hash_key   = "username"
 
-#   attributes = [
-#     { name = "username", type = "S" },
-#     { name = "email",   type = "S" },
-#   ]
+#     attributes = [
+#         { name = "username", type = "S" },
+#         { name = "email",   type = "S" },
+#     ]
 # }
+locals {
+    lambda_role_arns = {
+        "dynamodb_lambda_role" = module.dynamodb_lambda_role.role_arn
+        "dynamodb_lambda_role" = module.default_lambda_role.role_arn
+    }
 
-# module "lambda" {
-#   source = "./lambda_module"
+    lambda_functions_with_roles = [
+        for func in var.lambda_functions : merge(
+        func,
+        {
+            role_arn = lookup(local.lambda_role_arns, func.role_arn, module.default_lambda_role.role_arn)
 
-#   lambda_functions = var.lambda_functions
+        }
+        )
+    ]
+}
+module "lambda" {
+    source = "./modules/lambda"
 
-#   lambda_s3_bucket = "your-lambda-code-bucket"
-#   lambda_s3_key    = "your-lambda-code.zip"
-# }
+    lambda_functions = local.lambda_functions_with_roles
+    lambda_s3_bucket = "lambda-upload-bangbang-check-bucket" # .zip파일 저장된 버킷 이름
+}
+
 
 module "cloudwatch_logs" {
     source = "./modules/cloudwatch_logs"
@@ -111,29 +127,41 @@ module "cloudwatch_logs" {
     retention_in_days = 14
 }
 
-# module "api_gateway" {
-#     source = "./api_gateway_module"
+module "api_gateway" {
+    source = "./modules/api_gateway"
 
-#     lambda_functions = [
-#     for lambda in var.lambda_functions : {
-#         name                = lambda.name
-#         api_resource_path   = lambda.api_resource_path != "" ? lambda.api_resource_path : ""
-#         arn                 = lambda.role_arn
-#         http_method         = lambda.http_method
-#         }
-#     ]
+    custom_domain_name = "api.bangbang-check.com"
 
-#     log_group_arn = module.cloudwatch_logs.api_gateway_log_group_arn
-#     authorizer_name  = "api-gateway-cognito-authorizer"
-#     cognito_user_pool_arn = module.cognito.user_pool_arn
-#     is_private_api = false
-#     acm_certificate_arn = module.acm.apigw_validation_arn
-# }
+    lambda_functions = [
+    for i,lambda in var.lambda_functions : {
+        name                = lambda.name
+        api_resource_path   = lambda.api_resource_path
+        arn                 = module.lambda.lambda_invoke_arn[i]
+        http_method         = lambda.http_method
+        }
+    ]
 
-# module "default_lambda_role" {
-#     source = "./modules/iam_role"
-#     name   = "default-lambda-role"
-#     policy_arns = [
-#         "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-#     ]
-# }
+    log_group_arn = module.cloudwatch_logs.api_gateway_log_group_arn
+    authorizer_name  = "api-gateway-cognito-authorizer"
+    cognito_user_pool_arn = module.cognito.user_pool_arn
+    is_private_api = false
+    acm_certificate_arn = module.acm.apigw_validation_arn
+
+}
+
+module "default_lambda_role" {
+    source = "./modules/iam_role"
+    name   = "default-lambda-role"
+    policy_arns = [
+        "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+    ]
+}
+
+module "dynamodb_lambda_role" {
+    source = "./modules/iam_role"
+    name   = "dynamodb-lambda-role"
+    policy_arns = [
+        "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+        "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+    ]
+}

@@ -1,7 +1,7 @@
 # 커스텀 도메인 생성
 resource "aws_api_gateway_domain_name" "this" {
   domain_name = var.custom_domain_name  # 예: api.example.com
-  certificate_arn = var.acm_certificate_arn  # ACM 인증서 ARN
+  regional_certificate_arn = var.acm_certificate_arn  # ACM 인증서 ARN
 
   endpoint_configuration {
     types = ["REGIONAL"]  # REGION 기반으로 설정
@@ -23,14 +23,14 @@ resource "aws_api_gateway_base_path_mapping" "this" {
   count = length(var.lambda_functions)
 
   api_id      = aws_api_gateway_rest_api.this[count.index].id
-  stage_name  = "prod"
+  stage_name  = aws_api_gateway_stage.this[count.index].stage_name
   domain_name = aws_api_gateway_domain_name.this.domain_name
-  base_path   = var.lambda_functions[count.index].api_resource_path  # 각 API에 맞는 경로 설정
+  base_path   = "" #커스텀 도메인을 API Gateway의 루트 경로(/)에 매핑
 }
 
 # REST API 인증기
 resource "aws_api_gateway_authorizer" "this" {
-  count                  = var.lambda_functions[count.index].authorization != "" ? 1 : 0  # 인증기가 필요할 경우에만 생성
+  count                  = length(var.lambda_functions)
   name                   = var.authorizer_name
   rest_api_id            = aws_api_gateway_rest_api.this[count.index].id
   identity_source        = "method.request.header.Authorization"
@@ -52,7 +52,8 @@ resource "aws_api_gateway_method" "this" {
   rest_api_id  = aws_api_gateway_rest_api.this[count.index].id
   resource_id  = aws_api_gateway_resource.this[count.index].id
   http_method  = var.lambda_functions[count.index].http_method
-  authorization = var.lambda_functions[count.index].authorization != "" ? var.lambda_functions[count.index].authorization : null
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.this[count.index].id
 }
 
 # API Gateway와 Lambda 함수 간의 통합을 설정
@@ -63,14 +64,33 @@ resource "aws_api_gateway_integration" "this" {
   http_method = aws_api_gateway_method.this[count.index].http_method
   integration_http_method = "POST"  # Lambda 통합은 POST 메소드 사용
   type = "AWS_PROXY"
-  uri  = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda_functions[count.index].arn}/invocations"
+  uri  = var.lambda_functions[count.index].arn
 }
 
 # API를 배포
 resource "aws_api_gateway_deployment" "this" {
   count        = length(var.lambda_functions)
   rest_api_id  = aws_api_gateway_rest_api.this[count.index].id
-  depends_on   = [aws_api_gateway_integration.this]
+  depends_on   = [
+    aws_api_gateway_integration.this,
+    aws_api_gateway_method_response.options,
+    aws_api_gateway_integration_response.options
+  ]
+  # 변경사항 있으면 자동배포
+  triggers = {
+    redeployment = sha1(jsonencode({
+      integration       = aws_api_gateway_integration.this[count.index].id
+      method            = aws_api_gateway_method.this[count.index].id
+      resource          = aws_api_gateway_resource.this[count.index].id
+      options_method    = aws_api_gateway_method.options[count.index].id
+      options_integration = aws_api_gateway_integration.options[count.index].id
+    }))
+  }
+
+  #새로 생성한 Deployment가 Stage에 연결된 이후에 기존 Deployment를 삭제
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # 배포 스테이지
@@ -79,22 +99,34 @@ resource "aws_api_gateway_stage" "this" {
   rest_api_id  = aws_api_gateway_rest_api.this[count.index].id
   stage_name   = "prod"
   deployment_id = aws_api_gateway_deployment.this[count.index].id
+  
+  # 리소스 생성 순서 보장. depends_on의 자원이 생성된 후에 현재 자원 생성
+  depends_on = [
+    aws_api_gateway_integration.this,
+    aws_api_gateway_account.this,
+    aws_api_gateway_deployment.this
+  ]
 
-  depends_on = [aws_api_gateway_integration.this]
-
-  # Canary settings
-  canary_settings {
-    percent_traffic = 10  # 카나리아 배포에 보낼 트래픽 비율 (예: 10%는 카나리아)
-    deployment_id           = aws_api_gateway_deployment.this[count.index].id
-    use_stage_cache = true  # 캐시 사용 여부
-  }
+  # # Canary settings
+  # canary_settings {
+  #   deployment_id = 
+  #   percent_traffic = 10  # 카나리아 배포에 보낼 트래픽 비율 (예: 10%는 카나리아)
+  #   use_stage_cache = true  # 캐시 사용 여부
+  # }
 
   # Optional: 로그 커스터마이징 및 다른 스테이지 설정
   access_log_settings {
     # CloudWatch 로그 그룹 ARN
     destination_arn = var.log_group_arn
     # 로그 형식
-    format          = "$context.requestId $context.status $context.errorMessage"
+    format = jsonencode({
+      requestId = "$context.requestId"
+      status = "$context.status"
+      error = "$context.error.message"
+      authorizer_error = "$context.authorizer.error"
+      integration_status = "$context.integration.status"
+      user = "$context.authorizer.claims"
+    })
   }
 }
 
@@ -111,6 +143,107 @@ resource "aws_api_gateway_method_settings" "this" {
     data_trace_enabled = true  # 데이터 추적 활성화
   }
 }
+
+# 1. CloudWatch Logs 역할 생성
+resource "aws_iam_role" "apigateway_cloudwatch_logs_role" {
+  name = "apigateway-cloudwatch-logs-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = {
+        Service = "apigateway.amazonaws.com"
+      },
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+# 2. 역할에 정책 부여
+resource "aws_iam_role_policy_attachment" "apigateway_logs_attachment" {
+  role       = aws_iam_role.apigateway_cloudwatch_logs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+}
+
+# 3. API Gateway 계정 설정에 로그 역할 등록
+resource "aws_api_gateway_account" "this" {
+  cloudwatch_role_arn = aws_iam_role.apigateway_cloudwatch_logs_role.arn
+}
+
+# OPTIONS 메서드 추가
+resource "aws_api_gateway_method" "options" {
+  count         = length(var.lambda_functions)
+  rest_api_id   = aws_api_gateway_rest_api.this[count.index].id
+  resource_id   = aws_api_gateway_resource.this[count.index].id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+# MOCK 통합 (Lambda가 아닌 내부 Mock)
+resource "aws_api_gateway_integration" "options" {
+  count                     = length(var.lambda_functions)
+  rest_api_id               = aws_api_gateway_rest_api.this[count.index].id
+  resource_id               = aws_api_gateway_resource.this[count.index].id
+  http_method               = aws_api_gateway_method.options[count.index].http_method
+  type                      = "MOCK"
+  integration_http_method   = "OPTIONS"
+
+  request_templates = {
+    "application/json" = <<EOF
+{
+  "statusCode": 200
+}
+EOF
+  }
+}
+
+# 응답 정의
+resource "aws_api_gateway_method_response" "options" {
+  count       = length(var.lambda_functions)
+  rest_api_id = aws_api_gateway_rest_api.this[count.index].id
+  resource_id = aws_api_gateway_resource.this[count.index].id
+  http_method = "OPTIONS"
+  status_code = "200"
+
+  depends_on = [
+    aws_api_gateway_method.options
+  ]
+
+  response_models = {
+    "application/json" = "Empty"
+  }
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+# OPTIONS 요청의 응답 헤더
+resource "aws_api_gateway_integration_response" "options" {
+  count       = length(var.lambda_functions)
+  rest_api_id = aws_api_gateway_rest_api.this[count.index].id
+  resource_id = aws_api_gateway_resource.this[count.index].id
+  http_method = "OPTIONS"
+  status_code = "200"
+
+  depends_on = [
+    aws_api_gateway_integration.options
+  ]
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS'" # 필요에 따라 수정
+    "method.response.header.Access-Control-Allow-Origin"  = "'https://www.bangbang-check.com'"
+  }
+
+  response_templates = {
+    "application/json" = ""
+  }
+}
+
 
 # 프라이빗 API일 경우에만 VPC 엔드포인트와 VPC 링크 생성
 # resource "aws_vpc_endpoint" "this" {

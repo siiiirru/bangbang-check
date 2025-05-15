@@ -16,7 +16,3 @@ variable "lambda_s3_bucket" {
   type        = string
 }
 
-variable "lambda_s3_key" {
-  description = "The S3 key for the Lambda function code."
-  type        = string
-}
