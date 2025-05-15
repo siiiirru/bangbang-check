@@ -86,6 +86,11 @@ resource "aws_api_gateway_deployment" "this" {
       options_integration = aws_api_gateway_integration.options[count.index].id
     }))
   }
+
+  #새로 생성한 Deployment가 Stage에 연결된 이후에 기존 Deployment를 삭제
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # 배포 스테이지
