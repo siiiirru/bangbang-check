@@ -5,7 +5,7 @@ exports.handler = async (event) => {
             headers: {
                 "Access-Control-Allow-Origin": "https://www.bangbang-check.com",
                 "Access-Control-Allow-Headers": "Authorization,Content-Type",
-                "Access-Control-Allow-Methods": "GET,OPTIONS",
+                "Access-Control-Allow-Methods": "GET,OPTIONS"
             },
             body: "",
         };
@@ -29,7 +29,7 @@ exports.handler = async (event) => {
         headers: {
             "Access-Control-Allow-Origin": "https://www.bangbang-check.com", // 또는 특정 도메인
             "Access-Control-Allow-Headers": "Authorization,Content-Type",
-            "Access-Control-Allow-Methods": "GET,OPTIONS",
+            "Access-Control-Allow-Methods": "GET,OPTIONS"
         },
     }
 }

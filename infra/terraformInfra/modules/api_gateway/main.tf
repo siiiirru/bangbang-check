@@ -71,8 +71,21 @@ resource "aws_api_gateway_integration" "this" {
 resource "aws_api_gateway_deployment" "this" {
   count        = length(var.lambda_functions)
   rest_api_id  = aws_api_gateway_rest_api.this[count.index].id
-  depends_on   = [aws_api_gateway_integration.this]
-  # stage_name  = aws_api_gateway_stage.this[count.index].stage_name
+  # depends_on   = [
+  #   aws_api_gateway_integration.this,
+  #   aws_api_gateway_method_response.options,
+  #   aws_api_gateway_integration_response.options
+  # ]
+  # 변경사항 있으면 자동배포
+  triggers = {
+    redeployment = sha1(jsonencode({
+      integration       = aws_api_gateway_integration.this[count.index].id
+      method            = aws_api_gateway_method.this[count.index].id
+      resource          = aws_api_gateway_resource.this[count.index].id
+      options_method    = aws_api_gateway_method.options[count.index].id
+      options_integration = aws_api_gateway_integration.options[count.index].id
+    }))
+  }
 }
 
 # 배포 스테이지
@@ -85,7 +98,8 @@ resource "aws_api_gateway_stage" "this" {
   # 리소스 생성 순서 보장. depends_on의 자원이 생성된 후에 현재 자원 생성
   depends_on = [
     aws_api_gateway_integration.this,
-    aws_api_gateway_account.this  
+    aws_api_gateway_account.this,
+    aws_api_gateway_deployment.this
   ]
 
   # # Canary settings
@@ -100,7 +114,14 @@ resource "aws_api_gateway_stage" "this" {
     # CloudWatch 로그 그룹 ARN
     destination_arn = var.log_group_arn
     # 로그 형식
-    format          = "$context.requestId $context.status $context.errorMessage"
+    format = jsonencode({
+      requestId = "$context.requestId"
+      status = "$context.status"
+      error = "$context.error.message"
+      authorizer_error = "$context.authorizer.error"
+      integration_status = "$context.integration.status"
+      user = "$context.authorizer.claims"
+    })
   }
 }
 
@@ -208,7 +229,7 @@ resource "aws_api_gateway_integration_response" "options" {
   ]
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Authorization,Content-Type'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS'" # 필요에 따라 수정
     "method.response.header.Access-Control-Allow-Origin"  = "'https://www.bangbang-check.com'"
   }

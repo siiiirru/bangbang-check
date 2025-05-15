@@ -13,3 +13,13 @@ resource "aws_lambda_function" "this" {
   }
 }
 
+resource "aws_lambda_permission" "allow_api_gateway" {
+  count        = length(var.lambda_functions)
+  action       = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.this[count.index].function_name
+  principal    = "apigateway.amazonaws.com"
+  statement_id = "AllowExecutionFromAPIGateway-${aws_lambda_function.this[count.index].function_name}"
+
+  depends_on = [aws_lambda_function.this]
+}
+

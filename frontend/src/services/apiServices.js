@@ -7,10 +7,12 @@ export const API_BASE_URL = "https://api.bangbang-check.com";
 export const getAuthHeaders = async () => {
     try {
         const session = await fetchAuthSession();
-        const accessToken = session.tokens?.accessToken?.toString();
-
+        const idToken = session.tokens?.idToken?.toString();
+        if (!idToken) {
+            throw new Error("토큰이 없습니다.");
+        }
         return {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${idToken}`,
         "Content-Type": "application/json"
         };
     } catch (error) {

@@ -108,6 +108,7 @@ locals {
         func,
         {
             role_arn = lookup(local.lambda_role_arns, func.role_arn, module.default_lambda_role.role_arn)
+
         }
         )
     ]
@@ -118,6 +119,7 @@ module "lambda" {
     lambda_functions = local.lambda_functions_with_roles
     lambda_s3_bucket = "lambda-upload-bangbang-check-bucket" # .zip파일 저장된 버킷 이름
 }
+
 
 module "cloudwatch_logs" {
     source = "./modules/cloudwatch_logs"
@@ -144,6 +146,7 @@ module "api_gateway" {
     cognito_user_pool_arn = module.cognito.user_pool_arn
     is_private_api = false
     acm_certificate_arn = module.acm.apigw_validation_arn
+
 }
 
 module "default_lambda_role" {

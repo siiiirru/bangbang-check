@@ -31,14 +31,6 @@ export function ProjectList() {
       const headers = await getAuthHeaders();  // 공통 헤더 가져오기
       const username = localStorage.getItem("user");
 
-       // 1. 먼저 OPTIONS 요청을 보내서 CORS를 처리
-      await axios.options(`${API_BASE_URL}/projects`, {
-          headers,
-          params: {
-              username: username, // 쿼리 파라미터
-          }
-      });
-
       const response = await axios.get(`${API_BASE_URL}/projects`, {
         headers,
         params: {
