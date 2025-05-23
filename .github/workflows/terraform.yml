@@ -1,10 +1,10 @@
 name: 'Terraform'
 
 on:
-workflow_run:
-    workflows: ["lambda"]   # 'lambda' 워크플로우 이름 (name 필드)
-    types:
-      - completed
+  workflow_run:
+      workflows: ["lambda"]   # 'lambda' 워크플로우 이름 (name 필드)
+      types:
+        - completed
   # push:
   #   branches: [ "dev" ]
   #   paths:
