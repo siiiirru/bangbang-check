@@ -5,7 +5,7 @@ const { handler } = require('../lambda_functions/createProjects/index'); // Lamb
 const testEvent = {
     httpMethod: "POST",
     body: JSON.stringify({
-        userId: "user123",
+        username: "user123",
         projectName: "테스트 프로젝트"
     }),
     headers: {

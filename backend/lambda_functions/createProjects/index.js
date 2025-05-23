@@ -24,7 +24,7 @@ exports.handler = async (event) => {
     const params = {
         TableName: "bangbang-check",
         Item : {
-            PK: `USER#${requestBody.userId}`,
+            PK: `USER#${requestBody.username}`,
             SK: `PROJECT#${projectId}`, 
             projectName: requestBody.projectName,
             createAt: new Date().toISOString()

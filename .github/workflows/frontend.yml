@@ -9,6 +9,7 @@ on:
     branches: [ "dev" ]
     paths:
       - "frontend/**"
+  workflow_dispatch:
 
 env:
   AWS_REGION: ap-northeast-2  # AWS 리전 설정
