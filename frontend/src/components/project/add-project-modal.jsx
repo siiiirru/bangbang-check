@@ -35,7 +35,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }) {
       const headers = await getAuthHeaders();
 
        // axios POST 요청
-      const response = await axios.post(
+        await axios.post(
         url,
         {
           username,
