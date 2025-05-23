@@ -16,7 +16,7 @@ env:
 
 permissions:
   id-token: write      # OIDC 토큰을 가져올 수 있도록 허용
-  contents: read  # 코드 읽기 권한만 부여
+  contents: write  # 코드 읽기 권한만 부여
 
 jobs:
   deploy:
