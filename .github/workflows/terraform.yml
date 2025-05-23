@@ -1,10 +1,8 @@
 name: Terraform
 
 on:
-  workflow_run:
-      workflows: ["lambda"]   # 'lambda' 워크플로우 이름 (name 필드)
-      types:
-        - completed
+  repository_dispatch:
+    types: [run-terraform]
   # push:
   #   branches: [ "dev" ]
   #   paths:

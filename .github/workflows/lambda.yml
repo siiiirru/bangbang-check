@@ -1,4 +1,4 @@
-name: 'lambda'
+name: lambda
 
 on:
   push:
@@ -9,7 +9,6 @@ on:
     branches: [ "dev" ]
     paths:
       - "backend/**"
-  workflow_dispatch:
 
 env:
   AWS_REGION: ap-northeast-2  # AWS 리전 설정
@@ -86,12 +85,8 @@ jobs:
           cd -
         done
 
-    # - name: Deploy to Lambda
-    #   run: |
-    #     for dir in $CHANGED_DIRS; do
-    #       echo "Deploying $dir"
-    #       aws lambda update-function-code \
-    #         --function-name $dir \
-    #         --s3-bucket your-bucket \
-    #         --s3-key $dir.zip
-    #     done
+    - name: Trigger Terraform workflow manually
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        event-type: run-terraform
