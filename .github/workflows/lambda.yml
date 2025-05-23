@@ -1,4 +1,4 @@
-name: 'lambda'
+name: lambda
 
 on:
   push:
@@ -16,7 +16,7 @@ env:
 
 permissions:
   id-token: write      # OIDC 토큰을 가져올 수 있도록 허용
-  contents: read  # 코드 읽기 권한만 부여
+  contents: write  # 코드 읽기 권한만 부여
 
 jobs:
   deploy:
@@ -85,12 +85,8 @@ jobs:
           cd -
         done
 
-    # - name: Deploy to Lambda
-    #   run: |
-    #     for dir in $CHANGED_DIRS; do
-    #       echo "Deploying $dir"
-    #       aws lambda update-function-code \
-    #         --function-name $dir \
-    #         --s3-bucket your-bucket \
-    #         --s3-key $dir.zip
-    #     done
+    - name: Trigger Terraform workflow manually
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        event-type: run-terraform
