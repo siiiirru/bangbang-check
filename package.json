@@ -1,9 +1,10 @@
 {
   "dependencies": {
-    "aws-amplify": "^6.14.2"
+    "aws-amplify": "^6.14.2",
+    "aws-sdk": "^2.1692.0",
+    "ulid": "^3.0.0"
   },
   "scripts": {
     "test": "node backend/lambda_tests/runAllTests.js"
   }
-
 }

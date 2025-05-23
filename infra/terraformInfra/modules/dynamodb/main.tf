@@ -1,21 +1,22 @@
 resource "aws_dynamodb_table" "this" {
   name         = var.table_name
   billing_mode = var.billing_mode
-  hash_key     = var.hash_key
+  hash_key  = "PK"
+  range_key = "SK"
 
-  # 속성 정의를 동적으로 생성
-  dynamic "attribute" {
-    for_each = var.attributes
-    content {
-      name = attribute.value.name
-      type = attribute.value.type
-    }
+  attribute {
+    name = "PK"
+    type = "S"
   }
 
-  # 정렬 키가 있으면 추가
-  lifecycle {
-    ignore_changes = [attribute]
+  attribute {
+    name = "SK"
+    type = "S"
   }
+
+  # PROVISIONED 모드일 때만 용량 지정. 용량 단위 초과시 쓰로틀링 발생
+  read_capacity  = var.billing_mode == "PROVISIONED" ? var.read_capacity : null
+  write_capacity = var.billing_mode == "PROVISIONED" ? var.write_capacity : null
 
   tags = var.tags
 }
