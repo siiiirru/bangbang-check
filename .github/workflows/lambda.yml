@@ -39,12 +39,11 @@ jobs:
 
     - name: Run tests 
       run: |
-        if [ -f package.json ]; then
-          npm install
-        fi
         if [ -f backend/lambda_tests/runAllTests.js ]; then
           echo "Running tests for changed Lambda functions"
+          cd backend
           npm install
+          cd backend/lambda_tests
           npm test
         else
           echo "No runAllTests.js found, skipping tests."
@@ -83,7 +82,9 @@ jobs:
       run: |
         for layer in $CHANGED_LAYERS; do
           if [ -d "backend/lambda_layer/$layer" ]; then
-            cd backend/lambda_layer/$layer
+            cd backend/lambda_layer/$layer/nodejs
+            npm install
+            cd ..
             echo "Zipping changed layer $layer"
             zip -r /tmp/${layer}.zip nodejs
             aws s3 cp /tmp/${layer}.zip s3://${{ env.AWS_S3_BUCKET }}/lambda_layer/${layer}.zip

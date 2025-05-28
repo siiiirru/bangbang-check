@@ -1,0 +1,12 @@
+{
+  "name": "lambda_tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "createProjects.test.js",
+  "scripts": {
+    "test": "node runAllTests.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
