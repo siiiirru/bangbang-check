@@ -83,8 +83,9 @@ jobs:
       run: |
         for layer in $CHANGED_LAYERS; do
           if [ -d "backend/lambda_layer/$layer" ]; then
+            cd backend/lambda_layer/$layer
             echo "Zipping changed layer $layer"
-            zip -r /tmp/${layer}.zip backend/lambda_layer/$layer
+            zip -r /tmp/${layer}.zip nodejs
             aws s3 cp /tmp/${layer}.zip s3://${{ env.AWS_S3_BUCKET }}/lambda_layer/${layer}.zip
           fi
         done

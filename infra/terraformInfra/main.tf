@@ -127,7 +127,7 @@ resource "aws_lambda_layer_version" "ulid_layer" {
     layer_name       = "ulid-layer"
     s3_bucket           = "lambda-upload-bangbang-check-bucket"
     s3_key              = "lambda_layer/ulid-layer.zip"
-    compatible_runtimes = ["nodejs18.x", "nodejs20.x"]
+    compatible_runtimes = ["nodejs20.x"]
     description      = "Layer for ulid"
 }
 
