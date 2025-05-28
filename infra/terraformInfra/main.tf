@@ -151,7 +151,8 @@ module "api_gateway" {
         http_method         = lambda.http_method
         }
     ]
-
+    api_name="bangbang-check"
+    api_description = "bangbang-check api"
     log_group_arn = module.cloudwatch_logs.api_gateway_log_group_arn
     authorizer_name  = "api-gateway-cognito-authorizer"
     cognito_user_pool_arn = module.cognito.user_pool_arn

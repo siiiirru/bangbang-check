@@ -1,4 +1,4 @@
-# 커스텀 도메인 생성
+# 커스텀 도메인 생성 (공통)
 resource "aws_api_gateway_domain_name" "this" {
   domain_name = var.custom_domain_name  # 예: api.example.com
   regional_certificate_arn = var.acm_certificate_arn  # ACM 인증서 ARN
@@ -8,31 +8,27 @@ resource "aws_api_gateway_domain_name" "this" {
   }
 }
 
-# REST API 생성
+# REST API Gateway (공통)
 resource "aws_api_gateway_rest_api" "this" {
-  count       = length(var.lambda_functions) #동적으로 리소스를 여러 개 생성
-  name        = "${var.lambda_functions[count.index].name}-api"
-  description = "API for ${var.lambda_functions[count.index].name} Lambda function"
+  name        = var.api_name
+  description = var.api_description
   endpoint_configuration {
-    types = var.is_private_api ? ["PRIVATE"] : ["REGIONAL"]  # 프라이빗 API인지 퍼블릭 API인지 선택
+    types = var.is_private_api ? ["PRIVATE"] : ["REGIONAL"]
   }
 }
 
-# API Gateway와 커스텀 도메인 연결
+# API Gateway와 커스텀 도메인 연결(공통)
 resource "aws_api_gateway_base_path_mapping" "this" {
-  count = length(var.lambda_functions)
-
-  api_id      = aws_api_gateway_rest_api.this[count.index].id
-  stage_name  = aws_api_gateway_stage.this[count.index].stage_name
+  api_id      = aws_api_gateway_rest_api.this.id
+  stage_name  = aws_api_gateway_stage.this.stage_name
   domain_name = aws_api_gateway_domain_name.this.domain_name
-  base_path   = "" #커스텀 도메인을 API Gateway의 루트 경로(/)에 매핑
+  base_path   = ""
 }
 
-# REST API 인증기
+# REST API 인증기 (공통)
 resource "aws_api_gateway_authorizer" "this" {
-  count                  = length(var.lambda_functions)
   name                   = var.authorizer_name
-  rest_api_id            = aws_api_gateway_rest_api.this[count.index].id
+  rest_api_id            = aws_api_gateway_rest_api.this.id
   identity_source        = "method.request.header.Authorization"
   provider_arns          = [var.cognito_user_pool_arn]
   type                   = "COGNITO_USER_POOLS"
