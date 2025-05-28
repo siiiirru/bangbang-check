@@ -31,7 +31,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }) {
 
     try {
       // 람다 함수 URL (API Gateway 엔드포인트)
-      const url = `${API_BASE_URL}/createProjects`
+      const url = `${API_BASE_URL}/projects`
       const headers = await getAuthHeaders();
 
        // axios POST 요청
