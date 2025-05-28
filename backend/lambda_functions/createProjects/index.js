@@ -36,8 +36,9 @@ exports.handler = async (event) => {
     };
 
     try {
-        await docClient.send(new PutCommand(params));
-
+        const result = await docClient.send(new PutCommand(params));
+        console.log("PutCommand 결과:", result);
+        
         return {
         statusCode: 200,
         body: JSON.stringify({ message: "데이터 저장 완료" }),
