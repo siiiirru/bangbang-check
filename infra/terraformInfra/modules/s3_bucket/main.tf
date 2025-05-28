@@ -45,3 +45,26 @@ resource "aws_s3_bucket_policy" "website_policy" {
   })
 }
 
+resource "aws_s3_bucket_versioning" "this" {
+  count  = var.is_versioning ? 1 : 0
+  bucket = aws_s3_bucket.this.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# 버킷 수명 주기 정책. 1일이 지난 이전 버전들은 삭제
+resource "aws_s3_bucket_lifecycle_configuration" "example" {
+  count  = var.is_versioning ? 1 : 0
+  bucket = aws_s3_bucket.this.id
+  rule {
+    id     = "delete-old-versions"
+    status = "Enabled"
+    filter {
+      prefix = ""
+    }
+    noncurrent_version_expiration {
+      noncurrent_days = 1 # 1일 후 삭제
+    }
+  }
+}

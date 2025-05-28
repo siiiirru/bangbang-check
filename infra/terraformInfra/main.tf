@@ -55,6 +55,7 @@ module "lambda_bucket" {
         Project = var.project_name
     }
     force_destroy = true
+    is_versioning = true
 }
 
 module "cognito" {
@@ -123,7 +124,6 @@ module "lambda" {
     ulid_layer_arn = aws_lambda_layer_version.ulid_layer.arn
 }
 
-# 버킷 버전관리 안해서 파일 바뀌면 terraform taint aws_lambda_layer_version.ulid_layer로 재생성
 resource "aws_lambda_layer_version" "ulid_layer" {
     layer_name       = "ulid-layer"
     s3_bucket           = "lambda-upload-bangbang-check-bucket"

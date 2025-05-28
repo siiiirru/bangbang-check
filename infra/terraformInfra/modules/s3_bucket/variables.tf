@@ -33,3 +33,8 @@ variable "cloudfront_distribution_arn" {
   default = null
   description = "배포하는 클라우드프론트 arn"
 }
+
+variable "is_versioning" {
+  type    = bool
+  default = false
+}

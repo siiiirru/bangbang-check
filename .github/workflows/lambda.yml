@@ -100,6 +100,17 @@ jobs:
           aws s3 cp /tmp/$dir.zip s3://${{ env.AWS_S3_BUCKET }}/$dir.zip
           cd -
         done
+    
+    - name: Update Lambda function code
+      run: |
+        for dir in $CHANGED_DIRS; do
+          if aws lambda get-function --function-name "$dir" > /dev/null 2>&1; then
+            echo "Updating Lambda function code for $dir"
+            aws lambda update-function-code --function-name "$dir" --s3-bucket ${{ env.AWS_S3_BUCKET }} --s3-key "$dir.zip"
+          else
+            echo "Lambda function $dir does not exist, skipping update."
+          fi  
+        done
 
     - name: Trigger Terraform workflow manually
       uses: peter-evans/repository-dispatch@v3
