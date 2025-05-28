@@ -43,7 +43,7 @@ jobs:
           echo "Running tests for changed Lambda functions"
           cd backend
           npm install
-          cd backend/lambda_tests
+          cd lambda_tests
           npm test
         else
           echo "No runAllTests.js found, skipping tests."
