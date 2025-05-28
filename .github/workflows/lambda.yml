@@ -54,7 +54,8 @@ jobs:
       id: detect
       run: |
         echo "CHANGED_DIRS=$(git diff --name-only origin/dev...HEAD | grep '^backend/lambda_functions/' | awk -F'/' '{print $3}' | sort -u | uniq | tr '\n' ' ')" >> $GITHUB_ENV
-
+        echo "CHANGED_LAYERS=$(git diff --name-only origin/dev...HEAD | grep '^backend/lambda_layer/' | awk -F'/' '{print $3}' | sort -u | uniq | tr '\n' ' ')" >> $GITHUB_ENV
+        
     - name: npm install changed functions
       run: |
         for dir in $CHANGED_DIRS; do
@@ -74,6 +75,17 @@ jobs:
         role-to-assume: arn:aws:iam::418295688903:role/GitHubActionsOIDCRole 
         role-session-name: GitHub_to_AWS_via_FederatedOIDC 
         aws-region: ${{ env.AWS_REGION }}
+
+    - name: Zip lambda layers (like ulid-layer)
+      run: |
+        echo "Zipping lambda layers..."
+        cd backend/lambda_layer
+        for layer in */ ; do
+          layer_name=$(basename $layer)
+          echo "Zipping $layer_name"
+          zip -r /tmp/${layer_name}.zip $layer
+          aws s3 cp /tmp/${layer_name}.zip s3://${{ env.AWS_S3_BUCKET }}/${layer_name}.zip
+        done
 
     - name: Zip and upload to S3
       run: |
