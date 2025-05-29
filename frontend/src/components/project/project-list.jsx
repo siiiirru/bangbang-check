@@ -49,7 +49,7 @@ export function ProjectList() {
   }, [])
 
     if (isLoading) {
-    return <div>로딩 중...</div>;
+    return <div className="text-gray-700">로딩 중...</div>;
   }
 
 
