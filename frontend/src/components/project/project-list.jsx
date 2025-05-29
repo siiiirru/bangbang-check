@@ -55,7 +55,6 @@ export function ProjectList() {
 
   // 프로젝트 추가 핸들러
   const handleAddProject = (name,id) => {
-    console.log("프로젝트 추가 핸들러 id :",id)
     const newProject = {
       id,
       name,
@@ -93,10 +92,29 @@ export function ProjectList() {
   }
 
   // 선택된 프로젝트 삭제
-  const deleteSelectedProjects = () => {
-    setProjects(projects.filter((project) => !selectedForDelete.includes(project.id)))
-    setIsDeleteMode(false)
-    setSelectedForDelete([])
+  const deleteSelectedProjects = async () => {
+    const username = localStorage.getItem("user");
+    const headers = await getAuthHeaders();
+    try {
+      // 삭제할 각 프로젝트에 대해 Lambda 호출
+      await Promise.all(
+        selectedForDelete.map((projectId) =>
+          axios.delete(`${API_BASE_URL}/projects`, {
+            headers,
+            data: {
+              username,
+              projectId,
+            },
+          })
+        )
+      );
+      setProjects(projects.filter((project) => !selectedForDelete.includes(project.id)))
+      setIsDeleteMode(false)
+      setSelectedForDelete([])
+    }catch (error) {
+      console.error("프로젝트 삭제 중 오류 발생:", error);
+      alert("프로젝트 삭제에 실패했습니다.");
+    }
   }
 
   // 선택된 프로젝트 공유

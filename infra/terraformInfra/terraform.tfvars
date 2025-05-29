@@ -16,5 +16,14 @@ lambda_functions = [
         api_resource_path     = "projects"
         http_method = "POST"
         role_arn = "dynamodb_lambda_role"  # 동적으로 참조
+    },
+    {
+        name                  = "deleteProjects"
+        handler               = "index.handler"
+        runtime               = "nodejs20.x"
+        environment_variables = { "ENV_VAR" = "value1" }
+        api_resource_path     = "projects"
+        http_method = "DELETE"
+        role_arn = "dynamodb_lambda_role"  # 동적으로 참조
     }
 ]

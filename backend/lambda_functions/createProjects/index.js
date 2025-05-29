@@ -11,7 +11,6 @@ if (process.env.MOCK_DYNAMODB === 'true') {
     // Mock 객체 (v3에서는 Promise 반환하는 함수 형태)
     ddbClient = {
     send: async (command) => {
-        console.log('[MOCK] DynamoDB command 호출됨:', command.input);
         return Promise.resolve({});
     }
     };
