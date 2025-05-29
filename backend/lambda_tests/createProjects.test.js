@@ -1,11 +1,15 @@
-// Lambda handler 함수 호출을 위한 테스트 코드
-const { handler } = require('../lambda_functions/getProjects/index'); // Lambda 함수가 정의된 파일을 require
+process.env.MOCK_DYNAMODB = 'true';
+const { handler } = require('../lambda_functions/createProjects/index'); // Lambda 함수가 정의된 파일을 require
 
 // 테스트용 event 객체
 const testEvent = {
-    httpMethod: "GET", // GET 요청
-    queryStringParameters: {
-        username: "xogkwn" // 쿼리 파라미터로 username 전달
+    httpMethod: "POST",
+    body: JSON.stringify({
+        username: "user123",
+        projectName: "테스트 프로젝트"
+    }),
+    headers: {
+        "Content-Type": "application/json"
     }
 };
 

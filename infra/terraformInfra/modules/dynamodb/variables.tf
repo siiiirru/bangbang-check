@@ -9,17 +9,16 @@ variable "billing_mode" {
   description = "청구 방식"
 }
 
-variable "hash_key" {
-  type        = string
-  description = "파티션 키 이름"
+variable "read_capacity" {
+  type = number
+  default = 25
+  description = "프로비져닝 모드에서 읽기 용량. 프리티어는 25까지 제공"
 }
 
-variable "attributes" {
-  description = "속성 리스트 (파티션 키, 정렬 키 포함)"
-  type = list(object({
-    name = string
-    type = string # S, N, B
-  }))
+variable "write_capacity" {
+  type = number
+  default = 25
+  description = "프로비져닝 모드에서 쓰기 용량. 프리티어는 25까지 제공"
 }
 
 variable "tags" {

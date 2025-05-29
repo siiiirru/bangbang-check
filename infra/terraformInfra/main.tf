@@ -2,7 +2,7 @@ terraform {
     required_providers{
         aws = {
             source = "hashicorp/aws"
-            version = "~> 4.16"
+            version = "~> 5.96.0"
         }
     }
     required_version = ">=1.11.3"
@@ -87,20 +87,22 @@ module "acm" {
     zone_id = module.route53.zone_id
 }
 
-# module "user_table" {
-#     source     = "./modules/dynamodb"
-#     table_name = "users"
-#     hash_key   = "username"
+module "dynamodb" {
+    source     = "./modules/dynamodb"
+    table_name = "bangbang-check"
+    billing_mode = "PROVISIONED"
 
-#     attributes = [
-#         { name = "username", type = "S" },
-#         { name = "email",   type = "S" },
-#     ]
-# }
+    tags = {
+        Environment = "dev"
+        Project = var.project_name
+    }
+
+}
+
 locals {
     lambda_role_arns = {
         "dynamodb_lambda_role" = module.dynamodb_lambda_role.role_arn
-        "dynamodb_lambda_role" = module.default_lambda_role.role_arn
+        "default_lambda_role" = module.default_lambda_role.role_arn
     }
 
     lambda_functions_with_roles = [
@@ -118,9 +120,18 @@ module "lambda" {
 
     lambda_functions = local.lambda_functions_with_roles
     lambda_s3_bucket = "lambda-upload-bangbang-check-bucket" # .zip파일 저장된 버킷 이름
+    ulid_layer_arn = aws_lambda_layer_version.ulid_layer.arn
 }
 
+resource "aws_lambda_layer_version" "ulid_layer" {
+    layer_name       = "ulid-layer"
+    s3_bucket           = "lambda-upload-bangbang-check-bucket"
+    s3_key              = "lambda_layer/ulid-layer.zip"
+    compatible_runtimes = ["nodejs20.x"]
+    description      = "Layer for ulid"
+}
 
+# API-GW 로그
 module "cloudwatch_logs" {
     source = "./modules/cloudwatch_logs"
     name = "/aws/apigateway/bangbangcheck-api-log-group"
@@ -140,7 +151,8 @@ module "api_gateway" {
         http_method         = lambda.http_method
         }
     ]
-
+    api_name="bangbang-check"
+    api_description = "bangbang-check api"
     log_group_arn = module.cloudwatch_logs.api_gateway_log_group_arn
     authorizer_name  = "api-gateway-cognito-authorizer"
     cognito_user_pool_arn = module.cognito.user_pool_arn

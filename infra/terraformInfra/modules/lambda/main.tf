@@ -7,6 +7,8 @@ resource "aws_lambda_function" "this" {
   s3_bucket = var.lambda_s3_bucket
   s3_key    = "${var.lambda_functions[count.index].name}.zip"
   role      = var.lambda_functions[count.index].role_arn
+
+  layers = [var.ulid_layer_arn]
   
   environment {
     variables = var.lambda_functions[count.index].environment_variables

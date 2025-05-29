@@ -1,13 +1,15 @@
-name: 'Terraform'
+name: Terraform
 
 on:
-  push:
-    branches: [ "dev" ]
-    paths:
-      - "infra/terraformInfra/**"  # terraform 폴더 내 파일만 변경될 때 실행
-  pull_request:
-    paths:
-      - "infra/terraformInfra/**"  # pull request 시에도 terraform 폴더 변경 시에만 실행
+  repository_dispatch:
+    types: [run-terraform]
+  # push:
+  #   branches: [ "dev" ]
+  #   paths:
+  #     - "infra/terraformInfra/**"  # terraform 폴더 내 파일만 변경될 때 실행
+  # pull_request:
+  #   paths:
+  #     - "infra/terraformInfra/**"  # pull request 시에도 terraform 폴더 변경 시에만 실행
 
 
 env:

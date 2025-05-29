@@ -1,12 +1,12 @@
-# variable "api_name" {
-#   type        = string
-#   description = "Name of the API"
-# }
+variable "api_name" {
+  type        = string
+  description = "Name of the API"
+}
 
-# variable "api_description" {
-#   type        = string
-#   description = "API description"
-# }
+variable "api_description" {
+  type        = string
+  description = "API description"
+}
 
 variable "authorizer_name" {
   type        = string

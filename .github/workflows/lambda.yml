@@ -1,4 +1,4 @@
-name: 'lambda'
+name: lambda
 
 on:
   push:
@@ -16,7 +16,7 @@ env:
 
 permissions:
   id-token: write      # OIDC 토큰을 가져올 수 있도록 허용
-  contents: read  # 코드 읽기 권한만 부여
+  contents: write  # 코드 읽기 권한만 부여
 
 jobs:
   deploy:
@@ -39,12 +39,11 @@ jobs:
 
     - name: Run tests 
       run: |
-        if [ -f package.json ]; then
-          npm install
-        fi
         if [ -f backend/lambda_tests/runAllTests.js ]; then
           echo "Running tests for changed Lambda functions"
+          cd backend
           npm install
+          cd lambda_tests
           npm test
         else
           echo "No runAllTests.js found, skipping tests."
@@ -53,7 +52,11 @@ jobs:
     - name: Detect changed Lambda function folders
       id: detect
       run: |
-        echo "CHANGED_DIRS=$(git diff --name-only origin/dev...HEAD | grep '^backend/lambda_functions/' | awk -F'/' '{print $3}' | sort -u | uniq | tr '\n' ' ')" >> $GITHUB_ENV
+        changed_dirs=$(git diff --name-only origin/dev...HEAD | grep '^backend/lambda_functions/' | awk -F'/' '{print $3}' | sort -u | uniq | tr '\n' ' ')
+        echo "CHANGED_DIRS=$changed_dirs" >> $GITHUB_ENV
+
+        changed_layers=$(git diff --name-only origin/dev...HEAD | grep '^backend/lambda_layer/' | awk -F'/' '{print $3}' | sort -u | uniq | tr '\n' ' ')
+        echo "CHANGED_LAYERS=$changed_layers" >> $GITHUB_ENV
 
     - name: npm install changed functions
       run: |
@@ -75,6 +78,19 @@ jobs:
         role-session-name: GitHub_to_AWS_via_FederatedOIDC 
         aws-region: ${{ env.AWS_REGION }}
 
+    - name: Zip lambda layers and upload to S3
+      run: |
+        for layer in $CHANGED_LAYERS; do
+          if [ -d "backend/lambda_layer/$layer" ]; then
+            cd backend/lambda_layer/$layer/nodejs
+            npm install
+            cd ..
+            echo "Zipping changed layer $layer"
+            zip -r /tmp/${layer}.zip nodejs
+            aws s3 cp /tmp/${layer}.zip s3://${{ env.AWS_S3_BUCKET }}/lambda_layer/${layer}.zip
+          fi
+        done
+
     - name: Zip and upload to S3
       run: |
         for dir in $CHANGED_DIRS; do
@@ -84,13 +100,20 @@ jobs:
           aws s3 cp /tmp/$dir.zip s3://${{ env.AWS_S3_BUCKET }}/$dir.zip
           cd -
         done
+    
+    - name: Update Lambda function code
+      run: |
+        for dir in $CHANGED_DIRS; do
+          if aws lambda get-function --function-name "$dir" > /dev/null 2>&1; then
+            echo "Updating Lambda function code for $dir"
+            aws lambda update-function-code --function-name "$dir" --s3-bucket ${{ env.AWS_S3_BUCKET }} --s3-key "$dir.zip"
+          else
+            echo "Lambda function $dir does not exist, skipping update."
+          fi  
+        done
 
-    # - name: Deploy to Lambda
-    #   run: |
-    #     for dir in $CHANGED_DIRS; do
-    #       echo "Deploying $dir"
-    #       aws lambda update-function-code \
-    #         --function-name $dir \
-    #         --s3-bucket your-bucket \
-    #         --s3-key $dir.zip
-    #     done
+    - name: Trigger Terraform workflow manually
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        event-type: run-terraform
