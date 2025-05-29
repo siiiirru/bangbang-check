@@ -55,7 +55,6 @@ module "lambda_bucket" {
         Project = var.project_name
     }
     force_destroy = true
-    is_versioning = true
 }
 
 module "cognito" {

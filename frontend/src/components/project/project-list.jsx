@@ -54,9 +54,9 @@ export function ProjectList() {
 
 
   // 프로젝트 추가 핸들러
-  const handleAddProject = (name) => {
+  const handleAddProject = (name,id) => {
     const newProject = {
-      id: Date.now().toString(),
+      id,
       name,
     }
     setProjects([...projects, newProject])

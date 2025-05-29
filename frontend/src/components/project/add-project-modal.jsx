@@ -35,7 +35,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }) {
       const headers = await getAuthHeaders();
 
        // axios POST 요청
-        await axios.post(
+      const response =  await axios.post(
         url,
         {
           username,
@@ -46,8 +46,10 @@ export function AddProjectModal({ isOpen, onClose, onAdd }) {
         }
       )
 
+      const projectId=response.data.projectId
+
       // 요청 성공 시 onAdd 호출
-      onAdd(projectName)
+      onAdd(projectName,projectId)
 
       // 상태 초기화 및 모달 닫기
       setProjectName("")

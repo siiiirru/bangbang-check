@@ -24,24 +24,40 @@ if (process.env.MOCK_DYNAMODB === 'true') {
 exports.handler = async (event) => {
     const requestBody = JSON.parse(event.body);
     const projectId = ulid();
+    const projectName = requestBody.projectName;
+
+    // 기본 검증 로직
+    if (!projectName || typeof projectName !== 'string' || projectName.length > 100 || /[<>"'&]/.test(projectName)) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ error: "유효하지 않은 프로젝트 이름입니다." }),
+            headers: {
+                "Access-Control-Allow-Origin": "https://www.bangbang-check.com"
+            }
+        };
+    }
 
     const params = {
         TableName: "bangbang-check",
         Item: {
         PK: `USER#${requestBody.username}`,
         SK: `PROJECT#${projectId}`,
-        projectName: requestBody.projectName,
+        projectName: projectName,
         createdAt: new Date().toISOString()
         }
     };
 
     try {
         const result = await docClient.send(new PutCommand(params));
-        console.log("PutCommand 결과:", result);
-        
+
         return {
         statusCode: 200,
-        body: JSON.stringify({ message: "데이터 저장 완료" }),
+        body: JSON.stringify(
+            { 
+                message: "데이터 저장 완료", 
+                projectId: projectId 
+            }
+        ),
         headers: {
             "Access-Control-Allow-Origin": "https://www.bangbang-check.com"
         }
