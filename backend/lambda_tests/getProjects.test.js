@@ -5,7 +5,7 @@ const { handler } = require('../lambda_functions/getProjects/index'); // Lambda 
 const testEvent = {
     httpMethod: "GET", // GET 요청
     queryStringParameters: {
-        username: "testuser" // 쿼리 파라미터로 username 전달
+        username: "xogkwn" // 쿼리 파라미터로 username 전달
     }
 };
 
