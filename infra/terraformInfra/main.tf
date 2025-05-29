@@ -123,12 +123,12 @@ module "lambda" {
     ulid_layer_arn = aws_lambda_layer_version.ulid_layer.arn
 }
 
-resource "aws_lambda_layer_version" "ulid_layer" {
-    layer_name       = "ulid-layer"
+resource "aws_lambda_layer_version" "dynamodb_layer" {
+    layer_name       = "dynamodb-layer"
     s3_bucket           = "lambda-upload-bangbang-check-bucket"
-    s3_key              = "lambda_layer/ulid-layer.zip"
+    s3_key              = "lambda_layer/dynamodb-layer.zip"
     compatible_runtimes = ["nodejs20.x"]
-    description      = "Layer for ulid"
+    description      = "Layer for dynamodb"
 }
 
 # API-GW 로그

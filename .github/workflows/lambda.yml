@@ -2,7 +2,7 @@ name: lambda
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "feat/#17/projects_room_crud" ] # 현재 브랜치
     paths:
       - "backend/**"
   pull_request:
@@ -88,6 +88,23 @@ jobs:
             echo "Zipping changed layer $layer"
             zip -r /tmp/${layer}.zip nodejs
             aws s3 cp /tmp/${layer}.zip s3://${{ env.AWS_S3_BUCKET }}/lambda_layer/${layer}.zip
+          fi
+        done
+
+    - name: Update Lambda Layers
+      run: |
+        for layer in $CHANGED_LAYERS; do
+          if [ ! -z "$layer" ]; then
+            exists=$(aws lambda list-layer-versions --layer-name $layer --query 'LayerVersions | length(@)' --output text 2>/dev/null || echo 0)
+            if [ "$exists" -gt 0 ]; then
+              echo "Publishing new version of existing layer $layer"
+              aws lambda publish-layer-version \
+                --layer-name $layer \
+                --content S3Bucket=${{ env.AWS_S3_BUCKET }},S3Key=lambda_layer/${layer}.zip \
+                --compatible-runtimes nodejs20.x
+            else
+              echo "Layer $layer does not exist, skipping publish."
+            fi
           fi
         done
 

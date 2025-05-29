@@ -2,7 +2,7 @@ name: Deploy React to S3
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "feat/#17/projects_room_crud" ] #현재 브랜치
     paths:
       - "frontend/**"
   pull_request:
