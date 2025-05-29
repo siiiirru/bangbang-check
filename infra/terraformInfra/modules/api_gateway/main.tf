@@ -212,8 +212,8 @@ resource "aws_api_gateway_integration_response" "options" {
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS'" # 필요에 따라 수정
-    "method.response.header.Access-Control-Allow-Origin"  = "'https://www.bangbang-check.com'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,DELETE,OPTIONS'" # 필요에 따라 수정
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'" # 개발 후 https://www.bangbang-check.com로 수정
   }
 
   response_templates = {

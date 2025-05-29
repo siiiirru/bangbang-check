@@ -21,6 +21,14 @@ if (process.env.MOCK_DYNAMODB === 'true') {
 }
 
 exports.handler = async (event) => {
+    const allowedOrigins = [
+        "https://www.bangbang-check.com",
+        "http://localhost:3000"
+    ];
+
+    const origin = event.headers.origin || event.headers.Origin;
+    const allowOrigin = allowedOrigins.includes(origin) ? origin : "";
+
     const requestBody = JSON.parse(event.body);
     const projectId = ulid();
     const projectName = requestBody.projectName;
@@ -31,7 +39,7 @@ exports.handler = async (event) => {
             statusCode: 400,
             body: JSON.stringify({ error: "유효하지 않은 프로젝트 이름입니다." }),
             headers: {
-                "Access-Control-Allow-Origin": "https://www.bangbang-check.com"
+                "Access-Control-Allow-Origin": allowOrigin
             }
         };
     }
@@ -39,10 +47,10 @@ exports.handler = async (event) => {
     const params = {
         TableName: "bangbang-check",
         Item: {
-        PK: `USER#${requestBody.username}`,
-        SK: `PROJECT#${projectId}`,
-        projectName: projectName,
-        createdAt: new Date().toISOString()
+            PK: `USER#${requestBody.username}`,
+            SK: `PROJECT#${projectId}`,
+            projectName: projectName,
+            createdAt: new Date().toISOString()
         }
     };
 
@@ -50,25 +58,23 @@ exports.handler = async (event) => {
         const result = await docClient.send(new PutCommand(params));
 
         return {
-        statusCode: 200,
-        body: JSON.stringify(
-            { 
-                message: "데이터 저장 완료", 
-                projectId: projectId 
+            statusCode: 200,
+            body: JSON.stringify({
+                message: "데이터 저장 완료",
+                projectId: projectId
+            }),
+            headers: {
+                "Access-Control-Allow-Origin": allowOrigin
             }
-        ),
-        headers: {
-            "Access-Control-Allow-Origin": "https://www.bangbang-check.com"
-        }
         };
     } catch (error) {
         console.error("에러:", error);
         return {
-        statusCode: 500,
-        body: JSON.stringify({ error: "저장 중 오류 발생" }),
-        headers: {
-            "Access-Control-Allow-Origin": "https://www.bangbang-check.com"
-        }
+            statusCode: 500,
+            body: JSON.stringify({ error: "저장 중 오류 발생" }),
+            headers: {
+                "Access-Control-Allow-Origin": allowOrigin
+            }
         };
     }
 };

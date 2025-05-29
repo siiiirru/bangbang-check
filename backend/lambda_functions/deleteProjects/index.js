@@ -20,6 +20,14 @@ if (process.env.MOCK_DYNAMODB === 'true') {
 }
 
 exports.handler = async (event) => {
+    const allowedOrigins = [
+        "https://www.bangbang-check.com",
+        "http://localhost:3000"
+    ];
+
+    const origin = event.headers.origin || event.headers.Origin;
+    const allowOrigin = allowedOrigins.includes(origin) ? origin : "";
+
     const requestBody = JSON.parse(event.body);
     const username = requestBody.username;
     const projectId = requestBody.projectId;
@@ -30,7 +38,7 @@ exports.handler = async (event) => {
             statusCode: 400,
             body: JSON.stringify({ error: "username 또는 projectId가 유효하지 않습니다." }),
             headers: {
-                "Access-Control-Allow-Origin": "https://www.bangbang-check.com"
+                "Access-Control-Allow-Origin": allowOrigin
             }
         };
     }
@@ -53,7 +61,7 @@ exports.handler = async (event) => {
                 projectId: projectId
             }),
             headers: {
-                "Access-Control-Allow-Origin": "https://www.bangbang-check.com"
+                "Access-Control-Allow-Origin": allowOrigin
             }
         };
     } catch (error) {
@@ -62,7 +70,7 @@ exports.handler = async (event) => {
             statusCode: 500,
             body: JSON.stringify({ error: "삭제 중 오류 발생" }),
             headers: {
-                "Access-Control-Allow-Origin": "https://www.bangbang-check.com"
+                "Access-Control-Allow-Origin": allowOrigin
             }
         };
     }

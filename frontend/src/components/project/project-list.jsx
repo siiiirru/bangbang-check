@@ -7,7 +7,7 @@ import { Button } from "../ui/button"
 import { Plus, Trash2, Share2 } from "lucide-react"
 import axios from "axios";
 import {getAuthHeaders,API_BASE_URL} from "../../services/apiServices"
-
+import { ShareProjectModal } from "../project/share-project-modal"
 export function ProjectList() {
   // 프로젝트 목록 상태 
   const [projects, setProjects] = useState([])
@@ -23,6 +23,10 @@ export function ProjectList() {
   // 공유 모드 상태
   const [isShareMode, setIsShareMode] = useState(false)
   const [selectedForShare, setSelectedForShare] = useState(null)
+
+  // 공유 모달 상태
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [selectedShareProject, setSelectedShareProject] = useState(null)
 
   // 프로젝트 목록 가져오기
   useEffect(() => {
@@ -120,10 +124,10 @@ export function ProjectList() {
   // 선택된 프로젝트 공유
   const shareSelectedProject = () => {
     if (selectedForShare) {
-      // 여기에 공유 로직 구현
-      alert(`프로젝트 "${projects.find((p) => p.id === selectedForShare)?.name}"를 공유합니다.`)
-      setIsShareMode(false)
-      setSelectedForShare(null)
+      // 공유 버튼 클릭 시 모달 열기
+      const project = projects.find((p) => p.id === selectedForShare)
+      setSelectedShareProject(project)
+      setIsShareModalOpen(true)
     }
   }
 
@@ -193,6 +197,13 @@ export function ProjectList() {
 
       {/* 프로젝트 추가 모달 */}
       <AddProjectModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onAdd={handleAddProject} />
+      
+      {/* 프로젝트 공유 모달 */}
+      <ShareProjectModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        project={selectedShareProject}
+      />
     </div>
   )
 }

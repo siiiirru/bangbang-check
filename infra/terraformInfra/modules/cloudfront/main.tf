@@ -14,7 +14,9 @@ resource "aws_cloudfront_distribution" "this" {
     default_cache_behavior {
         target_origin_id = var.s3_origin_id
         viewer_protocol_policy = "redirect-to-https"
-        cache_policy_id  = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+        # 캐시 쓰려면 "658327ea-f89d-4fab-a63d-7e88639e58f6"
+        # 캐시 안쓰려면 "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+        cache_policy_id  = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
         allowed_methods = ["GET", "HEAD"]
         cached_methods = ["GET", "HEAD"]
     }
