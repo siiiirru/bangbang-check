@@ -120,7 +120,7 @@ module "lambda" {
 
     lambda_functions = local.lambda_functions_with_roles
     lambda_s3_bucket = "lambda-upload-bangbang-check-bucket" # .zip파일 저장된 버킷 이름
-    ulid_layer_arn = aws_lambda_layer_version.ulid_layer.arn
+    dynamodb_layer_arn = aws_lambda_layer_version.dynamodb_layer.arn
 }
 
 resource "aws_lambda_layer_version" "dynamodb_layer" {

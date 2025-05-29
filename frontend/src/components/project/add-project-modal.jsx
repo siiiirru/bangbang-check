@@ -47,7 +47,7 @@ export function AddProjectModal({ isOpen, onClose, onAdd }) {
       )
 
       const projectId=response.data.projectId
-
+      console.log("프로젝트 id: ",projectId)
       // 요청 성공 시 onAdd 호출
       onAdd(projectName,projectId)
 

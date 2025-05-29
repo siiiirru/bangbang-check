@@ -16,7 +16,7 @@ variable "lambda_s3_bucket" {
   description = "The S3 bucket where the Lambda function code is stored."
 }
 
-variable "ulid_layer_arn" {
+variable "dynamodb_layer_arn" {
   type = string
-  description = "id 생성을 위한 ulid 람다 레이어"
+  description = "dynamodb 람다 레이어"
 }

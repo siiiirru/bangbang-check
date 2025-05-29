@@ -55,6 +55,7 @@ export function ProjectList() {
 
   // 프로젝트 추가 핸들러
   const handleAddProject = (name,id) => {
+    console.log("프로젝트 추가 핸들러 id :",id)
     const newProject = {
       id,
       name,
