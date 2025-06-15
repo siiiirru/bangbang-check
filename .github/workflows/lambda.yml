@@ -130,4 +130,4 @@ jobs:
         done
 
     - name: Trigger Terraform workflow manually
-      uses: .github/workflows/terraform.yaml
+      uses: siiiirru/bangbang-check/.github/workflows/terraform.yaml
