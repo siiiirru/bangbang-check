@@ -23,5 +23,6 @@ variable "lambda_functions" {
     api_resource_path     = string  # API Gateway의 리소스 경로
     role_arn              = string  
     http_method           = string
+    requires_auth = bool
     }))
 }

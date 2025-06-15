@@ -1,6 +1,6 @@
 const { ulid } = require('ulid');
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, BatchWriteCommand } = require("@aws-sdk/lib-dynamodb");
 
 const REGION = "ap-northeast-2";
 
@@ -8,11 +8,10 @@ let ddbClient;
 let docClient;
 
 if (process.env.MOCK_DYNAMODB === 'true') {
-    // Mock 객체 (v3에서는 Promise 반환하는 함수 형태)
     ddbClient = {
-    send: async (command) => {
-        return Promise.resolve({});
-    }
+        send: async (command) => {
+            return Promise.resolve({});
+        }
     };
     docClient = ddbClient;
 } else {
@@ -26,14 +25,14 @@ exports.handler = async (event) => {
         "http://localhost:3000"
     ];
 
-    const origin = event.headers.origin || event.headers.Origin;
+    const origin = event.headers.origin || event.headers.Origin || "";
     const allowOrigin = allowedOrigins.includes(origin) ? origin : "";
 
     const requestBody = JSON.parse(event.body);
     const projectId = ulid();
     const projectName = requestBody.projectName;
+    const username = requestBody.username;
 
-    // 기본 검증 로직
     if (!projectName || typeof projectName !== 'string' || projectName.length > 100 || /[<>"'&]/.test(projectName)) {
         return {
             statusCode: 400,
@@ -44,18 +43,37 @@ exports.handler = async (event) => {
         };
     }
 
-    const params = {
-        TableName: "bangbang-check",
-        Item: {
-            PK: `USER#${requestBody.username}`,
-            SK: `PROJECT#${projectId}`,
-            projectName: projectName,
-            createdAt: new Date().toISOString()
+    const timestamp = new Date().toISOString();
+
+    const batchParams = {
+        RequestItems: {
+            "bangbang-check": [
+                {
+                    PutRequest: {
+                        Item: {
+                            PK: `USER#${username}`,
+                            SK: `PROJECT#${projectId}`,
+                            projectName: projectName,
+                            createdAt: timestamp
+                        }
+                    }
+                },
+                {
+                    PutRequest: {
+                        Item: {
+                            PK: `PROJECT#${projectId}`,
+                            SK: "META",
+                            createBy: username,
+                            createdAt: timestamp
+                        }
+                    }
+                }
+            ]
         }
     };
 
     try {
-        const result = await docClient.send(new PutCommand(params));
+        await docClient.send(new BatchWriteCommand(batchParams));
 
         return {
             statusCode: 200,

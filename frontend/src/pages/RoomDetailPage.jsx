@@ -7,6 +7,8 @@ import { Skeleton } from "../components/ui/skeleton"
 import { Header,GoProject } from "../components/header"
 import { useParams } from 'react-router-dom'
 import { userData, roomsData } from "../mock/data"
+// import {getAuthHeaders,API_BASE_URL} from "../../services/apiServices"
+// import axios from "axios"
 
 export default function RoomDetailPage() {
     const { id, roomId } = useParams()
@@ -14,7 +16,8 @@ export default function RoomDetailPage() {
     const [isEditing, setIsEditing] = useState(false)
     const [roomData, setRoomData] = useState(null)
     const [isOwner, setIsOwner] = useState(false)
-    const [isStarred, setIsStarred] = useState(false);
+    const [isStarred, setIsStarred] = useState(false)
+    // const username = localStorage.getItem('user')
     // 방 데이터 가져오기
     useEffect(() => {
       const fetchRoomData = async () => {

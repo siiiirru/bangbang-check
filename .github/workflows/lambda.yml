@@ -130,7 +130,4 @@ jobs:
         done
 
     - name: Trigger Terraform workflow manually
-      uses: peter-evans/repository-dispatch@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        event-type: run-terraform
+      uses: .github/workflows/terraform.yaml

@@ -8,7 +8,8 @@ const testEvent = {
         projectId: "proj123"
     }),
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "origin": "http://localhost:3000"
     }
 };
 

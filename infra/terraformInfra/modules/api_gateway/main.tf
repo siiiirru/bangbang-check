@@ -56,8 +56,10 @@ resource "aws_api_gateway_method" "this" {
   rest_api_id  = aws_api_gateway_rest_api.this.id
   resource_id  = aws_api_gateway_resource.this[var.lambda_functions[count.index].api_resource_path].id
   http_method  = var.lambda_functions[count.index].http_method
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.this.id
+  
+  authorization = var.lambda_functions[count.index].requires_auth ? "COGNITO_USER_POOLS" : "NONE"
+  # requires_auth가 true면 authorizer_id 지정, 아니면 null 처리
+  authorizer_id = var.lambda_functions[count.index].requires_auth ? aws_api_gateway_authorizer.this.id : null
 }
 
 # API Gateway와 Lambda 함수 간의 통합을 설정

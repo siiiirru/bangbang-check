@@ -1,5 +1,5 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, DeleteCommand } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, QueryCommand, BatchWriteCommand } = require("@aws-sdk/lib-dynamodb");
 
 const REGION = "ap-northeast-2";
 
@@ -8,9 +8,33 @@ let docClient;
 
 // MOCK 모드일 때는 send 함수만 흉내내는 객체로 대체
 if (process.env.MOCK_DYNAMODB === 'true') {
+    const { QueryCommand, BatchWriteCommand } = require("@aws-sdk/lib-dynamodb");
+
     ddbClient = {
         send: async (command) => {
-            return Promise.resolve({}); // 성공 응답 시뮬레이션
+            if (command instanceof QueryCommand) {
+                // 필요한 경우 가짜 데이터 넣어주기
+                if (command.input.ExpressionAttributeValues[":pk"].startsWith("PROJECT#")) {
+                    return {
+                        Items: [
+                            { PK: `PROJECT#proj123`, SK: `ROOM#room1` },
+                            { PK: `PROJECT#proj123`, SK: `TASK#task1` }
+                        ]
+                    };
+                } else if (command.input.ExpressionAttributeValues[":pk"].startsWith("ROOM#")) {
+                    return {
+                        Items: [
+                            { PK: `ROOM#room1`, SK: `DETAIL#1` },
+                            { PK: `ROOM#room1`, SK: `DETAIL#2` }
+                        ]
+                    };
+                }
+                return { Items: [] };
+            } else if (command instanceof BatchWriteCommand) {
+                return {}; // BatchWriteCommand에 대한 응답
+            } else {
+                return {};
+            }
         }
     };
     docClient = ddbClient;
@@ -43,16 +67,76 @@ exports.handler = async (event) => {
         };
     }
 
-    const params = {
-        TableName: "bangbang-check",
-        Key: {
-            PK: `USER#${username}`,
-            SK: `PROJECT#${projectId}`
-        }
-    };
-
     try {
-        await docClient.send(new DeleteCommand(params));
+        // PROJECT#projectId 하위 항목 조회
+        const projectItems = await docClient.send(
+            new QueryCommand({
+                TableName: "bangbang-check",
+                KeyConditionExpression: "PK = :pk",
+                ExpressionAttributeValues: {
+                    ":pk": `PROJECT#${projectId}`
+                }
+            })
+        );
+
+        const deleteRequests = [];
+
+        // 해당 항목들 삭제 요청 생성
+        for (const item of projectItems.Items) {
+            deleteRequests.push({
+                DeleteRequest: {
+                    Key: {
+                        PK: item.PK,
+                        SK: item.SK
+                    }
+                }
+            });
+
+            // ROOM#... 항목이면 해당 room의 상세도 삭제
+            if (item.SK.startsWith("ROOM#")) {
+                const roomId = item.SK.replace("ROOM#", "");
+                const roomItems = await docClient.send(
+                    new QueryCommand({
+                        TableName: "bangbang-check",
+                        KeyConditionExpression: "PK = :pk",
+                        ExpressionAttributeValues: {
+                            ":pk": `ROOM#${roomId}`
+                        }
+                    })
+                );
+                for (const roomItem of roomItems.Items) {
+                    deleteRequests.push({
+                        DeleteRequest: {
+                            Key: {
+                                PK: roomItem.PK,
+                                SK: roomItem.SK
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        // USER#username 와 PROJECT 연결도 삭제
+        deleteRequests.push({
+            DeleteRequest: {
+                Key: {
+                    PK: `USER#${username}`,
+                    SK: `PROJECT#${projectId}`
+                }
+            }
+        });
+
+        // BatchWrite 25개씩 나눠서 실행
+        const chunkSize = 25;
+        for (let i = 0; i < deleteRequests.length; i += chunkSize) {
+            const chunk = deleteRequests.slice(i, i + chunkSize);
+            await docClient.send(new BatchWriteCommand({
+                RequestItems: {
+                    "bangbang-check": chunk
+                }
+            }));
+        }
 
         return {
             statusCode: 200,

@@ -6,45 +6,57 @@ import { RankingList } from "../components/room/ranking-list"
 import { GoProject, Header } from "../components/header"
 import { AiRecommendation } from "../components/room/ai-recommendation"
 import { ResetConfirmModal } from "../components/room/reset-confirm-modal"
-import { projectsData, roomsData } from "../mock/data"
+import {getAuthHeaders,API_BASE_URL} from "../services/apiServices"
+import { useLocation } from "react-router-dom"
+import axios from "axios"
+// import { roomsData } from "../mock/data"
+
 
 export default function ProjectDetailPage() {
-    const { id } = useParams()
-    const [projectName, setProjectName] = useState("")
-    const [isResetModalOpen, setIsResetModalOpen] = useState(false)
-    const [rankings, setRankings] = useState([])
-    const [allRooms, setAllRooms] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
+  const { id } = useParams()
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false)
+  const [rankings, setRankings] = useState([])
+  const [allRooms, setAllRooms] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isOwner, setIsOwner] = useState(false)
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const projectName = decodeURIComponent(searchParams.get("projectName"))
+  const username = localStorage.getItem('user')
 
   // 프로젝트 데이터 가져오기
   useEffect(() => {
     const fetchProjectData = async () => {
       setIsLoading(true)
-      try {
-        // AWS Lambda API 호출
-        /*
-        const projectData = await apiRequest(`/projects/${id}`)
-        setProjectName(projectData.name)
 
-        // 방 목록 가져오기
-        const roomsData = await apiRequest(`/projects/${id}/rooms`)
-        setAllRooms(roomsData)
-        */
+    try {
+      const headers = await getAuthHeaders();  
 
-        // Mock 데이터 사용
-        const projectData = projectsData.find((project) => project.id === id)
-        setProjectName(projectData?.name || "프로젝트")
+      // 서버에서 토큰이 없거나 username이 createBy와 다르면 게스트로 방정보만 받음
+      const response = await axios.get(`${API_BASE_URL}/project`, {
+      headers,
+      params: {
+          ...(username && { ownername: username }),
+          projectId:id
+        }
+      })
+      
+      const data = response.data
+      setAllRooms(data.rooms || [])
+      setIsOwner(data.isOwner)
+      
+      // 랭킹 설정
+      if (data.isOwner) {
+        const { rank1, rank2, rank3 } = data
 
-        const rooms = roomsData[id] || []
-        setAllRooms(rooms)
+        // rankings를 문자열 배열로 설정
+        setRankings([rank1, rank2, rank3])
+      }
 
-        // 별점 기준으로 정렬하여 랭킹 설정
-        const sortedRooms = [...rooms].sort((a, b) => b.stars - a.stars)
-        setRankings(sortedRooms)
-
-        setIsLoading(false)
+      setIsLoading(false)
       } catch (error) {
         console.error("프로젝트 데이터를 가져오는 중 오류 발생:", error)
+        setIsOwner(false)
         setIsLoading(false)
       }
     }
@@ -52,58 +64,35 @@ export default function ProjectDetailPage() {
     fetchProjectData()
   }, [id])
 
-  // 순위 초기화 처리
-  const handleResetRankings = async () => {
+   // 순위 업데이트 핸들러 - useCallback으로 메모이제이션
+const handleUpdateRanking = useCallback(
+  async (position, roomId) => {
     try {
-      // AWS Lambda API 호출
+      // 서버 호출 예시 (필요할 경우)
       /*
-      await apiRequest(`/projects/${id}/rankings/reset`, { method: "POST" })
+      await apiRequest(`/projects/${id}/rankings`, {
+        method: "PUT",
+        body: JSON.stringify({ position, roomId }),
+      })
       */
 
-      // 랭킹 초기화 후 UI 업데이트
-      setRankings(rankings.map((room) => ({ ...room, stars: 0 })))
-      setIsResetModalOpen(false)
+      // rankings 배열을 해당 위치에 맞게 업데이트
+      setRankings((prevRankings) => {
+        // 중복 제거: 다른 위치에 이미 들어가 있는 roomId는 제거
+        const filtered = prevRankings.filter((id) => id !== roomId)
+
+        // 새 배열 만들고 지정된 위치에 roomId 삽입
+        const updated = [...filtered]
+        updated[position] = roomId
+
+        return updated
+      })
     } catch (error) {
-      console.error("순위 초기화 중 오류 발생:", error)
+      console.error("순위 업데이트 중 오류 발생:", error)
     }
-  }
-
-   // 순위 업데이트 핸들러 - useCallback으로 메모이제이션
-   const handleUpdateRanking = useCallback(
-    async (position, roomId) => {
-      try {
-        // AWS Lambda API 호출
-        /*
-        await apiRequest(`/projects/${id}/rankings`, {
-          method: "PUT",
-          body: JSON.stringify({ position, roomId }),
-        })
-        */
-
-
-        // UI 업데이트
-        setRankings((prevRankings) => {
-          const newRankings = [...prevRankings]
-          // 선택된 방의 별 개수를 위치에 따라 설정 (1위: 3, 2위: 2, 3위: 1)
-          const starsForPosition = [3, 2, 1]
-
-          // 모든 방의 별점을 업데이트
-          return newRankings.map((room) => {
-            if (room.id === roomId) {
-              return { ...room, stars: starsForPosition[position] }
-            } else if (room.stars === starsForPosition[position]) {
-              // 다른 방이 같은 순위를 가지고 있었다면 초기화
-              return { ...room, stars: 0 }
-            }
-            return room
-          })
-        })
-      } catch (error) {
-        console.error("순위 업데이트 중 오류 발생:", error)
-      }
-    },
-  [id],
-  )
+  },
+  [id]
+)
 
   return (
     <div className="min-h-screen bg-gray-100 ">
@@ -120,11 +109,12 @@ export default function ProjectDetailPage() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-6">{projectName}</h2>
-              <RoomList projectId={id} rankings={rankings} setRankings={setRankings} />
+              <RoomList projectId={id} rooms={allRooms} rankings={rankings} setRankings={setRankings} isOwner={isOwner} />
             </div>
           </div>
 
-          {/* 사이드바 */}
+        {isOwner&&(
+          // 사이드바
           <div className="space-y-6">
             {/* 현재 순위 */}
             <div className="bg-white rounded-lg shadow-sm p-6">
@@ -147,12 +137,13 @@ export default function ProjectDetailPage() {
                 onUpdateRanking={handleUpdateRanking}
               />
             </div>
-
+            
             {/* 오늘의 AI 방 추천 */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <AiRecommendation projectId={id} />
-            </div>
+            </div>        
           </div>
+        )}
         </div>
       </div>
 
@@ -160,7 +151,7 @@ export default function ProjectDetailPage() {
       <ResetConfirmModal
         isOpen={isResetModalOpen}
         onClose={() => setIsResetModalOpen(false)}
-        onConfirm={handleResetRankings}
+        // onConfirm={handleResetRankings}
       />
     </div>
   )

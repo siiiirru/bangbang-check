@@ -1,5 +1,4 @@
-// Lambda handler 함수 호출을 위한 테스트 코드
-const { handler } = require('../lambda_functions/getProjects/index'); // Lambda 함수가 정의된 파일을 require
+const { handler } = require('../lambda_functions/getProject/index'); 
 
 // 테스트용 event 객체
 const testEvent = {
@@ -8,7 +7,15 @@ const testEvent = {
     },
     httpMethod: "GET", // GET 요청
     queryStringParameters: {
-        username: "xogkwn" // 쿼리 파라미터로 username 전달
+        username: "xogkwn", // 쿼리 파라미터로 username 전달
+        projectId: "01JWDBNVZJT5ESZS58R2BJ3VBR"
+    },
+    requestContext: {
+        authorizer: {
+            claims: {
+                "cognito:username": "xogkwn"
+            }
+        }
     }
 };
 

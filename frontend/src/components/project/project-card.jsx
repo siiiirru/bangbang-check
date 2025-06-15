@@ -11,6 +11,7 @@ export function ProjectCard({
   onDeleteCheckChange,
   onShareRadioChange,
 }) {
+
   return (
     <div className="bg-gray-200 rounded-md p-4 relative">
       {/* 삭제 모드일 때 체크박스 표시 */}
@@ -40,7 +41,7 @@ export function ProjectCard({
       )}
 
       {/* 프로젝트 내용 */}
-      <Link to={`/projects/${project.id}`} className="block">
+      <Link to={`/projects/${project.id}?projectName=${encodeURIComponent(project.name)}`} className="block">
         <div className={`h-24 flex items-center justify-center ${isDeleteMode || isShareMode ? "pr-8" : ""}`}>
           <h3 className="text-lg font-medium text-gray-800 text-center">{project.name}</h3>
         </div>
