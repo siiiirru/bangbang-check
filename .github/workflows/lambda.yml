@@ -129,5 +129,5 @@ jobs:
           fi  
         done
 
-    - name: Trigger Terraform workflow manually
-      uses: siiiirru/bangbang-check/.github/workflows/terraform.yaml@feat/#17/projects_room_crud
+  terraform:
+    uses: siiiirru/bangbang-check/.github/workflows/terraform.yaml@feat/#17/projects_room_crud
