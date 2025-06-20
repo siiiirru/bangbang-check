@@ -127,7 +127,7 @@ exports.handler = async (event) => {
             }
         });
 
-        // BatchWrite 25개씩 나눠서 실행
+        // BatchWrite 25개씩 나눠서 삭제 요청
         const chunkSize = 25;
         for (let i = 0; i < deleteRequests.length; i += chunkSize) {
             const chunk = deleteRequests.slice(i, i + chunkSize);
