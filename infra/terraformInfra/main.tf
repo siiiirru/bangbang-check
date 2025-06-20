@@ -149,6 +149,7 @@ module "api_gateway" {
         api_resource_path   = lambda.api_resource_path
         arn                 = module.lambda.lambda_invoke_arn[i]
         http_method         = lambda.http_method
+        requires_auth       = lambda.requires_auth
         }
     ]
     api_name="bangbang-check"
