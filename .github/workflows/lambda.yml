@@ -133,5 +133,5 @@ jobs:
         done
 
   terraform:
-    uses: ./.github/workflows/terraform.yml@feat/17/projects_room_crud
+    uses: ./.github/workflows/terraform.yml
     needs: lambda_upload
