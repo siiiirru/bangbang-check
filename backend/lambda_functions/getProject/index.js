@@ -25,8 +25,9 @@ exports.handler = async (event) => {
     username = claims["cognito:username"];
     }
 
-    // 인증토큰, 쿼리 파라미터 가져오기
+    // 인증 토큰 가져오기
     // const token = event.headers?.Authorization || null;
+    // 쿼리 파라미터 가져오기
     const queryParams = event.queryStringParameters;
 
     // 쿼리 파라미터에서 값 가져오기
@@ -65,7 +66,7 @@ exports.handler = async (event) => {
             stars: item.stars,
         })) || [];
 
-        projectsData = null;
+        let projectsData = null;
 
         // 게스트 반환값
         if(username!=meta.createBy){

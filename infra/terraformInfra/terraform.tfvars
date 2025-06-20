@@ -35,7 +35,7 @@ lambda_functions = [
         runtime               = "nodejs20.x"
         environment_variables = { "ENV_VAR" = "value1" }
         api_resource_path     = "project"
-        http_method = "DELETE"
+        http_method = "GET"
         role_arn = "dynamodb_lambda_role"  
         requires_auth = false
     }
