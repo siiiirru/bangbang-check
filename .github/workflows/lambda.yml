@@ -1,4 +1,4 @@
-name: lambda
+name: Deploy Lambda & Terraform
 
 on:
   push:
@@ -133,5 +133,5 @@ jobs:
         done
 
   terraform:
-    uses: siiiirru/bangbang-check/.github/workflows/terraform.yaml@feat/17/projects_room_crud
+    uses: ./.github/workflows/terraform.yaml@feat/17/projects_room_crud
     needs: lambda_upload
