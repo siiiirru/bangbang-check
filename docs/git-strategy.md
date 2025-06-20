@@ -27,26 +27,26 @@
 ## 기능 브랜치 (Feature Branch)
 
 - 새로운 기능 추가 작업 시 사용합니다.
-- 네이밍 규칙: `feature/<기능명>`
-- 예시: `feature/#22/login`, `feature/add-user-profile`
+- 네이밍 규칙: `feature/<이슈번호>/<기능명>`
+- 예시: `feature/22/login`, `feature/add-user-profile`
 
 ## 버그 수정 브랜치 (Bugfix Branch)
 
 - 발견된 버그를 수정할 때 사용합니다.
-- 네이밍 규칙: `fix/<버그명>`
-- 예시: `fix/#22/login-error`, `fix/api-response`
+- 네이밍 규칙: `fix/<이슈번호>/<버그명>`
+- 예시: `fix/22/login-error`, `fix/api-response`
 
 ## 리팩토링 브랜치
 
 - 코드 개선 작업 시 사용합니다.
-- 네이밍 규칙: `refactor/<리팩토링 내용>`
-- 예시: `refactor/#22/reduce-complexity`, `refactor/clean-code`
+- 네이밍 규칙: `refactor/<이슈번호>/<리팩토링 내용>`
+- 예시: `refactor/22/reduce-complexity`, `refactor/clean-code`
 
 ## 인프라 브랜치 (Terraform 등)
 
 - 인프라 코드(Terraform 등) 변경 시 사용합니다.
-- 네이밍 규칙: `infra/<작업내용>`
-- 예시: `infra/#22/add-s3`, `infra/update-lambda`
+- 네이밍 규칙: `infra/<이슈번호>/<작업내용>`
+- 예시: `infra/22/add-s3`, `infra/update-lambda`
 
 ## 브랜치 병합 규칙
 

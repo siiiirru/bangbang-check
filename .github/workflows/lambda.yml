@@ -2,13 +2,16 @@ name: lambda
 
 on:
   push:
-    branches: [ "feat/#17/projects_room_crud" ] # 현재 브랜치
+    branches: [ "feat/17/projects_room_crud" ] # 현재 브랜치
     paths:
       - "backend/**"
+      - "infra/**"
   pull_request:
     branches: [ "dev" ]
     paths:
       - "backend/**"
+      - "infra/**"
+  workflow_dispatch:
 
 env:
   AWS_REGION: ap-northeast-2  # AWS 리전 설정
@@ -19,7 +22,7 @@ permissions:
   contents: write  # 코드 읽기 권한만 부여
 
 jobs:
-  deploy:
+  lambda_upload:
     runs-on: ubuntu-latest
 
     steps:
@@ -130,4 +133,5 @@ jobs:
         done
 
   terraform:
-    uses: siiiirru/bangbang-check/.github/workflows/terraform.yaml@feat/#17/projects_room_crud
+    uses: siiiirru/bangbang-check/.github/workflows/terraform.yaml@feat/17/projects_room_crud
+    needs: lambda_upload
