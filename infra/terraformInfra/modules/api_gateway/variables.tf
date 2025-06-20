@@ -35,6 +35,7 @@ variable "lambda_functions" {
     api_resource_path   = string #API Gateway에서 Lambda를 호출할 때 사용되는 경로
     arn                 = string
     http_method         = string
+    requires_auth       = bool
   }))
 }
 
