@@ -11,7 +11,10 @@ let s3Client;
 if (process.env.MOCK_S3 === 'true') {
     s3Client = null;
 } else {
-    s3Client = new S3Client({ region: REGION });
+    s3Client = new S3Client({ 
+        region: REGION,
+        requestChecksumCalculation: "WHEN_REQUIRED"
+    });
 }
 
 exports.handler = async (event) => {
@@ -74,11 +77,13 @@ exports.handler = async (event) => {
         const command = new PutObjectCommand({
             Bucket: BUCKET_NAME,
             Key: key,
-            ContentType: contentType,
             ACL: 'public-read'
         });
 
-        const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 300 }); // 5분
+        const presignedUrl = await getSignedUrl(s3Client, command, { 
+            expiresIn: 300,
+            unhoistableHeaders: new Set(['x-amz-checksum-crc32'])
+        }); // 5분
         const imageUrl = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/${key}`;
 
         return {
