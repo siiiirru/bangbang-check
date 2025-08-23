@@ -40,21 +40,22 @@ export default function ProjectDetailPage() {
       })
       
       const data = response.data
-      setAllRooms(data.rooms || [])
-      setIsOwner(data.isOwner)
+      setAllRooms(Array.isArray(data.rooms) ? data.rooms : [])
+      setIsOwner(data.isOwner || false)
       
       // 랭킹 설정
       if (data.isOwner) {
         const { rank1, rank2, rank3 } = data
 
         // rankings를 문자열 배열로 설정
-        setRankings([rank1, rank2, rank3])
+        setRankings([rank1, rank2, rank3].filter(Boolean))
       }
 
       setIsLoading(false)
       } catch (error) {
         console.error("프로젝트 데이터를 가져오는 중 오류 발생:", error)
         setIsOwner(false)
+        setAllRooms([])
         setIsLoading(false)
       }
     }
@@ -77,7 +78,7 @@ const handleUpdateRanking = useCallback(
       // rankings 배열을 해당 위치에 맞게 업데이트
       setRankings((prevRankings) => {
         // 중복 제거: 다른 위치에 이미 들어가 있는 roomId는 제거
-        const filtered = prevRankings.filter((id) => id !== roomId)
+        const filtered = prevRankings.filter((rankId) => rankId !== roomId)
 
         // 새 배열 만들고 지정된 위치에 roomId 삽입
         const updated = [...filtered]
@@ -122,7 +123,7 @@ const handleUpdateRanking = useCallback(
                   variant="outline"
                   size="sm"
                   onClick={() => setIsResetModalOpen(true)}
-                  disabled={isLoading || rankings.every((room) => room.stars === 0)}
+                  disabled={isLoading || rankings.filter(Boolean).length === 0} 
                   className="text-gray-800"
                 >
                   초기화

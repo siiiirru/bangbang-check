@@ -73,9 +73,9 @@ exports.handler = async (event) => {
         .filter(item => item.SK !== "META")
         .map(item => ({
             roomId: item.SK.replace("ROOM#", ""),
-            name: item.name,
-            photo: item.photo,
-            stars: item.stars,
+            name: item.data.name,
+            photo: item.data.photo || "",
+            stars: item.stars || 0,
         })) || [];
 
         let projectsData = null;

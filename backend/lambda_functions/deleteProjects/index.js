@@ -91,30 +91,6 @@ exports.handler = async (event) => {
                     }
                 }
             });
-
-            // ROOM#... 항목이면 해당 room의 상세도 삭제
-            if (item.SK.startsWith("ROOM#")) {
-                const roomId = item.SK.replace("ROOM#", "");
-                const roomItems = await docClient.send(
-                    new QueryCommand({
-                        TableName: "bangbang-check",
-                        KeyConditionExpression: "PK = :pk",
-                        ExpressionAttributeValues: {
-                            ":pk": `ROOM#${roomId}`
-                        }
-                    })
-                );
-                for (const roomItem of roomItems.Items) {
-                    deleteRequests.push({
-                        DeleteRequest: {
-                            Key: {
-                                PK: roomItem.PK,
-                                SK: roomItem.SK
-                            }
-                        }
-                    });
-                }
-            }
         }
 
         // USER#username 와 PROJECT 연결도 삭제

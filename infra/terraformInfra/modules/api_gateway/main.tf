@@ -83,6 +83,7 @@ resource "aws_api_gateway_deployment" "this" {
     aws_api_gateway_integration_response.options,
   ]
   rest_api_id = aws_api_gateway_rest_api.this.id
+  # 개발용으로 매 변경 때마다 배포되도록 설정해둠
   triggers = {
     redeployment = sha1(jsonencode([var.lambda_functions,timestamp()]))
   }

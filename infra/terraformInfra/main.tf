@@ -35,7 +35,7 @@ module "image_bucket" {
     source = "./modules/s3_bucket"
     bucket_name = "user-upload-bangbang-check-bucket"
     enable_website = false
-    is_public = false
+    is_public = true
     tags = {
         Name = "image_bucket"
         Environment = "dev"
@@ -103,6 +103,7 @@ locals {
     lambda_role_arns = {
         "dynamodb_lambda_role" = module.dynamodb_lambda_role.role_arn
         "default_lambda_role" = module.default_lambda_role.role_arn
+        "s3_lambda_role" = module.s3_lambda_role.role_arn
     }
 
     lambda_functions_with_roles = [
@@ -176,5 +177,14 @@ module "dynamodb_lambda_role" {
     policy_arns = [
         "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
         "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+    ]
+}
+
+module "s3_lambda_role" {
+    source = "./modules/iam_role"
+    name   = "s3-lambda-role"
+    policy_arns = [
+        "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+        "arn:aws:iam::aws:policy/AmazonS3FullAccess"
     ]
 }

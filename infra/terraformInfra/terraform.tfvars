@@ -38,5 +38,25 @@ lambda_functions = [
         http_method = "GET"
         role_arn = "dynamodb_lambda_role"
         requires_auth = false
+    },
+    {
+        name                  = "createRoom"
+        handler               = "index.handler"
+        runtime               = "nodejs20.x"
+        environment_variables = { "ENV_VAR" = "value1" }
+        api_resource_path     = "rooms"
+        http_method = "POST"
+        role_arn = "dynamodb_lambda_role"
+        requires_auth = true
+    },
+    {
+        name                  = "getPresignedUrl"
+        handler               = "index.handler"
+        runtime               = "nodejs20.x"
+        environment_variables = { "ENV_VAR" = "value1" }
+        api_resource_path     = "get-presigned-url"
+        http_method = "POST"
+        role_arn = "s3_lambda_role"
+        requires_auth = true
     }
 ]

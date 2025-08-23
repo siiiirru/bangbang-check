@@ -4,6 +4,8 @@ import { Button } from "../components/ui/button"
 import { Save } from "lucide-react"
 import { RoomEditForm } from "../components/room/room-edit-form"
 import { GoProject, Header } from "../components/header"
+import {getAuthHeaders,API_BASE_URL} from "../services/apiServices"
+import axios from "axios"
 
 
 export default function RoomCreatePage() {
@@ -64,24 +66,68 @@ export default function RoomCreatePage() {
       comments: [],
     })
 
+  // Presigned URL로 이미지 업로드
+  const uploadImages = async (files) => {
+    if (!files || files.length === 0) return [];
+    
+    const uploadPromises = files.map(async (file) => {
+      // 1. Presigned URL 요청
+      const headers = await getAuthHeaders();
+      const presignedResponse = await axios.post(`${API_BASE_URL}/get-presigned-url`, {
+        fileName: file.name,
+        projectId: id
+      }, {
+        headers
+      });
+      
+      const { presignedUrl, imageUrl } = presignedResponse.data;
+      
+      // 2. Presigned URL로 직접 S3에 업로드
+      await axios.put(presignedUrl, file, {
+        headers: {
+          'Content-Type': file.type
+        }
+      });
+      
+      return imageUrl;
+    });
+    
+    return Promise.all(uploadPromises);
+  };
+
   // 방 생성 처리
   const handleCreateRoom = async (formData) => {
     try {
-      // AWS Lambda API 호출
-      /*
-      await apiRequest(`/projects/${id}/rooms`, {
-        method: "POST",
-        body: JSON.stringify(formData),
-      })
-      */
-
-      // Mock 데이터 사용 시 처리
-      console.log("방 생성 데이터:", formData)
+      // 1. 이미지 업로드
+      let imageUrls = [];
+      if (formData.photos && formData.photos.length > 0) {
+        console.log("이미지 업로드 중...");
+        imageUrls = await uploadImages(formData.photos);
+        console.log("업로드된 이미지 URLs:", imageUrls);
+      }
+      
+      // 2. 방 데이터에 이미지 URL 포함
+      const roomDataWithImages = {
+        ...formData,
+        photos: imageUrls  // File 객체를 URL로 교체
+      };
+      
+      // 3. 방 생성 API 호출
+      const headers = await getAuthHeaders();  
+      const response = await axios.post(`${API_BASE_URL}/rooms`, {
+          projectId: id,
+          roomData: roomDataWithImages
+      }, {
+        headers
+      });
+      
+      const data = response.data;
+      console.log("방 생성 완료:", data);
 
       // 프로젝트 상세 페이지로 이동
-      navigate(`/projects/${id}`)
+      navigate(`/projects/${id}`);
     } catch (error) {
-      console.error("방 생성 중 오류 발생:", error)
+      console.error("방 생성 중 오류 발생:", error);
     }
   }
 
