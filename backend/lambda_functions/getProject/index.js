@@ -44,7 +44,7 @@ exports.handler = async (event) => {
 
     // 쿼리 파라미터에서 값 가져오기
     // const username = queryParams?.username ?? null;
-    const pk = queryParams?.projectId ?? null;
+    const pk = `PROJECT#${queryParams?.projectId}` ?? null;
 
     if (!pk) {
         return {
