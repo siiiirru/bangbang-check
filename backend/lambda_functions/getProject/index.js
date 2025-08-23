@@ -22,7 +22,19 @@ exports.handler = async (event) => {
 
     let username = null;
     if (isAuthenticated) {
-    username = claims["cognito:username"];
+        username = claims["cognito:username"];
+    } else {
+        // 헤더에서 토큰 파싱 (검증 없이)
+        const authHeader = event.headers.Authorization || event.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            try {
+                const token = authHeader.substring(7);
+                const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+                username = payload['cognito:username'];
+            } catch (error) {
+                console.log("토큰 파싱 실패:", error);
+            }
+        }
     }
 
     // 인증 토큰 가져오기
@@ -102,7 +114,8 @@ exports.handler = async (event) => {
             body: JSON.stringify(projectsData),
             headers: {
                 "Access-Control-Allow-Origin": allowOrigin, // 또는 특정 도메인
-                "Access-Control-Allow-Methods": "OPTIONS,GET"
+                "Access-Control-Allow-Methods": "OPTIONS,GET",
+                "Access-Control-Allow-Headers": "Content-Type,Authorization"
             },
         }
 
@@ -113,6 +126,8 @@ exports.handler = async (event) => {
             body: JSON.stringify({ error: "서버 오류가 발생했습니다." }),
             headers: {
                 "Access-Control-Allow-Origin": allowOrigin,
+                "Access-Control-Allow-Methods": "OPTIONS,GET",
+                "Access-Control-Allow-Headers": "Content-Type,Authorization"
             },
         };
     }

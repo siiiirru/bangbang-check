@@ -7,7 +7,6 @@ const testEvent = {
     },
     httpMethod: "GET", // GET 요청
     queryStringParameters: {
-        username: "xogkwn", // 쿼리 파라미터로 username 전달
         projectId: "01JWDBNVZJT5ESZS58R2BJ3VBR"
     },
     requestContext: {

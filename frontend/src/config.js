@@ -1,7 +1,7 @@
 // Mock API 요청 처리 함수
 import { userData, projectsData, roomsData, commentsData } from "./mock/data"
 // AWS Lambda API 엔드포인트 설정
-export const API_BASE_URL = "https://api.bangbangcheck.com/api"
+export const API_BASE_URL = "https://api.bangbang-check.com"
 
 // Mock 데이터 사용 여부 설정
 export const USE_MOCK_DATA = true

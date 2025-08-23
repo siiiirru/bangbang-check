@@ -22,7 +22,6 @@ export default function ProjectDetailPage() {
   const location = useLocation()
   const searchParams = new URLSearchParams(location.search)
   const projectName = decodeURIComponent(searchParams.get("projectName"))
-  const username = localStorage.getItem('user')
 
   // 프로젝트 데이터 가져오기
   useEffect(() => {
@@ -36,7 +35,6 @@ export default function ProjectDetailPage() {
       const response = await axios.get(`${API_BASE_URL}/project`, {
       headers,
       params: {
-          ...(username && { ownername: username }),
           projectId:id
         }
       })

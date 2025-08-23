@@ -77,8 +77,10 @@ resource "aws_api_gateway_integration" "this" {
 resource "aws_api_gateway_deployment" "this" {
   depends_on = [
     aws_api_gateway_integration.this,
+    aws_api_gateway_method.options,
     aws_api_gateway_method_response.options,
-    aws_api_gateway_integration_response.options
+    aws_api_gateway_integration.options,
+    aws_api_gateway_integration_response.options,
   ]
   rest_api_id = aws_api_gateway_rest_api.this.id
   triggers = {
@@ -166,7 +168,7 @@ resource "aws_api_gateway_integration" "options" {
   resource_id = aws_api_gateway_resource.this[each.key].id
   http_method = aws_api_gateway_method.options[each.key].http_method
   type = "MOCK"
-  integration_http_method = "OPTIONS"
+  # integration_http_method = "OPTIONS"
 
   request_templates = {
     "application/json" = <<EOF
