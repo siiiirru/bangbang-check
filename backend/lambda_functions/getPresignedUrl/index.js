@@ -67,6 +67,7 @@ exports.handler = async (event) => {
         const contentTypeMap = {
             'jpg': 'image/jpeg',
             'jpeg': 'image/jpeg',
+            'jfif': 'image/jpeg',
             'png': 'image/png',
             'gif': 'image/gif',
             'webp': 'image/webp'
@@ -77,12 +78,13 @@ exports.handler = async (event) => {
         const command = new PutObjectCommand({
             Bucket: BUCKET_NAME,
             Key: key,
-            ACL: 'public-read'
+            ContentType: contentType
         });
 
         const presignedUrl = await getSignedUrl(s3Client, command, { 
             expiresIn: 300,
-            unhoistableHeaders: new Set(['x-amz-checksum-crc32'])
+            unhoistableHeaders: new Set(['x-amz-checksum-crc32']),
+            signableHeaders: new Set(['host'])  // 이 줄 추가
         }); // 5분
         const imageUrl = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/${key}`;
 

@@ -69,6 +69,9 @@ export function PhotoUploadModal({
       // 2. fetch로 S3에 업로드
       const uploadResponse = await fetch(presignedUrl, {
         method: 'PUT',
+        headers: {
+          "Content-Type": file.type
+        },
         body: file
       })
       
