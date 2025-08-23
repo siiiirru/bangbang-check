@@ -68,3 +68,16 @@ resource "aws_s3_bucket_lifecycle_configuration" "example" {
     }
   }
 }
+
+# CORS 설정
+resource "aws_s3_bucket_cors_configuration" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "PUT", "POST", "DELETE", "HEAD"]
+    allowed_origins = ["http://localhost:3000", "https://*.amazonaws.com", "https://bangbang-check.com"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}

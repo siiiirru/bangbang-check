@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
@@ -11,6 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog"
+import { getAuthHeaders, API_BASE_URL } from "../../services/apiServices"
+import axios from "axios"
 
 export function PhotoUploadModal({
   isOpen,
@@ -22,45 +24,70 @@ export function PhotoUploadModal({
   maxPhotos,
 }) {
   const [photos, setPhotos] = useState([...currentPhotos])
-  const [isUploading, setIsUploading] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
-  // 사진 업로드 핸들러 (데모용)
-  const handleUpload = async (e) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
+  // 파일 선택 핸들러
+  const handleFileSelect = async (e) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
 
-    setIsUploading(true)
+    // 최대 개수 체크
+    const availableSlots = maxPhotos - photos.length
+    const filesToAdd = files.slice(0, availableSlots)
 
-    try {
-      // 실제 구현에서는 여기에 API 요청으로 파일 업로드
-      // const formData = new FormData();
-      // for (let i = 0; i < files.length; i++) {
-      //   formData.append('photos', files[i]);
-      // }
-      // const response = await fetch(`/api/projects/${projectId}/rooms/${roomId}/photos`, {
-      //   method: 'POST',
-      //   body: formData
-      // });
-      // const uploadedPhotos = await response.json();
-
-      // 데모용 사진 URL 생성
-      const newPhotos = []
-      for (let i = 0; i < files.length; i++) {
-        if (photos.length + newPhotos.length >= maxPhotos) break
-
-        // 실제로는 업로드된 이미지 URL을 사용
-        // 데모에서는 placeholder 이미지 사용
-        newPhotos.push(`/placeholder.svg?height=400&width=600&text=업로드된_사진_${Date.now()}_${i}`)
+    if (filesToAdd.length > 0) {
+      setUploading(true)
+      try {
+        const uploadedUrls = await uploadPhotosToS3(filesToAdd)
+        setPhotos([...photos, ...uploadedUrls])
+      } catch (error) {
+        console.error('사진 업로드 실패:', error)
+        alert('사진 업로드에 실패했습니다.')
+      } finally {
+        setUploading(false)
       }
-
-      setPhotos([...photos, ...newPhotos])
-    } catch (error) {
-      console.error("사진 업로드 중 오류 발생:", error)
-    } finally {
-      setIsUploading(false)
-      // 파일 입력 초기화
-      e.target.value = ""
     }
+
+    // 파일 입력 초기화
+    e.target.value = ""
+  }
+
+  // Presigned URL로 S3 업로드
+  const uploadPhotosToS3 = async (files) => {
+    const uploadPromises = files.map(async (file) => {
+      // 1. Presigned URL 요청
+      const headers = await getAuthHeaders()
+      const presignedResponse = await axios.post(`${API_BASE_URL}/get-presigned-url`, {
+        fileName: file.name,
+        projectId: projectId
+      }, {
+        headers
+      })
+      
+      const { presignedUrl, imageUrl } = presignedResponse.data
+      
+      // 2. fetch로 S3에 업로드
+      const uploadResponse = await fetch(presignedUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type
+        }
+      })
+      
+      if (!uploadResponse.ok) {
+        throw new Error(`S3 업로드 실패: ${uploadResponse.status} ${uploadResponse.statusText}`)
+      }
+      
+      return imageUrl
+    })
+
+    return Promise.all(uploadPromises)
+  }
+
+  // 미리보기 URL 가져오기 (이제 모든 photo는 S3 URL 문자열)
+  const getPreviewUrl = (photo) => {
+    return typeof photo === 'string' && photo !== '' ? photo : '/placeholder.svg'
   }
 
   // 사진 삭제 핸들러
@@ -68,10 +95,13 @@ export function PhotoUploadModal({
     setPhotos(photos.filter((_, i) => i !== index))
   }
 
-  // 변경 사항 저장
+  // 변경 사항 저장 (S3 URL 배열 전달)
   const handleSave = () => {
     onPhotosUpdate(photos)
+    onClose()
   }
+
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -87,28 +117,32 @@ export function PhotoUploadModal({
         <div className="py-4 space-y-4">
           {/* 사진 업로드 버튼 */}
           <div className="flex items-center justify-center">
-            <Label
-              htmlFor="photo-upload"
+            <div
+              onClick={() => {
+                if (photos.length < maxPhotos && !uploading) {
+                  document.getElementById('photo-upload').click()
+                }
+              }}
               className={`flex items-center gap-2 px-4 py-2 rounded-md border cursor-pointer ${
-                photos.length >= maxPhotos
+                photos.length >= maxPhotos || uploading
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                   : "bg-violet-50 text-violet-600 hover:bg-violet-100 border-violet-200"
               }`}
             >
               <Upload size={16} />
               <span>
-                사진 업로드 ({photos.length}/{maxPhotos})
+                {uploading ? '업로드 중...' : `사진 선택 (${photos.length}/${maxPhotos})`}
               </span>
-              <Input
-                id="photo-upload"
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handleUpload}
-                disabled={photos.length >= maxPhotos || isUploading}
-              />
-            </Label>
+            </div>
+            <Input
+              id="photo-upload"
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleFileSelect}
+              disabled={photos.length >= maxPhotos || uploading}
+            />
           </div>
 
           {/* 사진 미리보기 */}
@@ -120,7 +154,7 @@ export function PhotoUploadModal({
                   className="relative group aspect-square bg-gray-100 rounded-md overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                 >
                   <img
-                    src={photo || "/placeholder.svg"}
+                    src={getPreviewUrl(photo)}
                     alt={`방 사진 ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
@@ -145,7 +179,7 @@ export function PhotoUploadModal({
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} className="border-gray-300">
+          <Button type="button" variant="outline" onClick={onClose} className="text-gray-700 border-gray-300">
             <X size={16} className="mr-1" />
             취소
           </Button>
@@ -153,7 +187,6 @@ export function PhotoUploadModal({
             type="button"
             onClick={handleSave}
             className="bg-violet-600 hover:bg-violet-700"
-            disabled={isUploading}
           >
             <Save size={16} className="mr-1" />
             변경 사항 저장

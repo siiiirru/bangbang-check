@@ -56,15 +56,25 @@ exports.handler = async (event) => {
         }
 
         // 파일 확장자 추출
-        const fileExtension = fileName.split('.').pop() || 'jpg';
+        const fileExtension = fileName.split('.').pop().toLowerCase() || 'jpg';
         const imageId = ulid();
         const key = `rooms/${projectId}/${imageId}.${fileExtension}`;
+
+        // Content-Type 매핑
+        const contentTypeMap = {
+            'jpg': 'image/jpeg',
+            'jpeg': 'image/jpeg',
+            'png': 'image/png',
+            'gif': 'image/gif',
+            'webp': 'image/webp'
+        };
+        const contentType = contentTypeMap[fileExtension] || 'image/jpeg';
 
         // Presigned URL 생성
         const command = new PutObjectCommand({
             Bucket: BUCKET_NAME,
             Key: key,
-            ContentType: `image/${fileExtension}`,
+            ContentType: contentType,
             ACL: 'public-read'
         });
 
