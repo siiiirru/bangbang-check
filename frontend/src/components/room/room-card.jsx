@@ -21,13 +21,26 @@ export function RoomCard({ room, projectId, isDeleteMode, isCheckedForDelete, on
         <div className="relative">
           {/* 방 이미지 */}
           <div className="bg-pink-300 aspect-square relative">
-            <img
-              src={`/placeholder.svg?height=200&width=200&text=${encodeURIComponent(room.name)}`}
-              alt={room.name}
-              width={200}
-              height={200}
-              className="w-full h-full object-cover"
-            />
+            {room.photos && room.photos.length > 0 ? (
+              <img
+                src={room.photos[0]}
+                alt={room.name}
+                width={200}
+                height={200}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = '/placeholder.svg'
+                }}
+              />
+            ) : (
+              <img
+                src="/placeholder.svg"
+                alt={room.name}
+                width={200}
+                height={200}
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
 
           {/* 방 이름 */}

@@ -74,7 +74,7 @@ exports.handler = async (event) => {
         .map(item => ({
             roomId: item.SK.replace("ROOM#", ""),
             name: item.data.name,
-            photo: item.data.photo || "",
+            photos: item.data.photos || [],
             stars: item.stars || 0,
         })) || [];
 

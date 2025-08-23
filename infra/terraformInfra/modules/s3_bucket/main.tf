@@ -12,13 +12,11 @@ resource "aws_s3_bucket_public_access_block" "this" {
   restrict_public_buckets = var.is_public ? false: true
 }
 
-resource "aws_s3_bucket_policy" "this" {
+resource "aws_s3_bucket_policy" "website_policy" {
   bucket = aws_s3_bucket.this.id
-
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = concat(
-      # 1) Public Read (is_public = true 이고 enable_website = false일 때 적용)
       var.is_public && !var.enable_website ? [
         {
           Sid       = "PublicReadGetObject",
@@ -29,7 +27,6 @@ resource "aws_s3_bucket_policy" "this" {
         }
       ] : [],
 
-      # 2) Website 전용 정책 (enable_website = true일 때만 적용)
       var.enable_website ? [
         {
           Sid       = "WebsiteReadGetObject",
@@ -47,7 +44,6 @@ resource "aws_s3_bucket_policy" "this" {
         }
       ] : [],
 
-      # 3) GitHub Actions 업로드 권한 (무조건 포함)
       [
         {
           Sid       = "GitHubActionsPutObject",
@@ -62,7 +58,6 @@ resource "aws_s3_bucket_policy" "this" {
     )
   })
 }
-
 
 resource "aws_s3_bucket_versioning" "this" {
   count  = var.is_versioning ? 1 : 0
