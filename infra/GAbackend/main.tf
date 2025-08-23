@@ -114,7 +114,7 @@ resource "aws_iam_role_policy" "allow_put_bucket_policy" {
     Statement = [
       {
         Effect   = "Allow"
-        Action   = "iam:PutBucketPolicy"
+        Action   = "s3:PutBucketPolicy"
         Resource = "arn:aws:s3:::bangbang-check"  # 해당 버킷에 대한 권한
       }
     ]
@@ -139,4 +139,28 @@ resource "aws_iam_role_policy_attachment" "cloudfront_policy" {
 resource "aws_iam_role_policy_attachment" "logs_policy" {
   role       = aws_iam_role.github_actions_role.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+}
+
+data "aws_caller_identity" "current" {}
+
+resource "aws_iam_role_policy" "allow_manage_s3_lambda_role" {
+  name = "AllowManageS3LambdaRole"
+  role = aws_iam_role.github_actions_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "iam:CreateRole",
+          "iam:AttachRolePolicy",
+          "iam:PutRolePolicy",
+          "iam:DeleteRole",
+          "iam:PassRole"
+        ],
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*"
+      }
+    ]
+  })
 }
