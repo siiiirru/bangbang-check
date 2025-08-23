@@ -12,38 +12,57 @@ resource "aws_s3_bucket_public_access_block" "this" {
   restrict_public_buckets = var.is_public ? false: true
 }
 
-resource "aws_s3_bucket_policy" "website_policy" {
-  count  = var.enable_website ? 1 : 0
+resource "aws_s3_bucket_policy" "this" {
   bucket = aws_s3_bucket.this.id
+
   policy = jsonencode({
     Version = "2012-10-17",
-    Statement = [
-      {
-        Sid       = "PublicReadGetObject",
-        Effect    = "Allow",
-        Principal = {
-          Service = "cloudfront.amazonaws.com"
-        },
-        Action    = "s3:GetObject",
-        Resource  = "${aws_s3_bucket.this.arn}/*",
-        Condition = {
-          StringEquals = {
-            "AWS:SourceArn" = "${var.cloudfront_distribution_arn}"  # 변수로 주입
+    Statement = concat(
+      # 1) Public Read (is_public = true 이고 enable_website = false일 때 적용)
+      var.is_public && !var.enable_website ? [
+        {
+          Sid       = "PublicReadGetObject",
+          Effect    = "Allow",
+          Principal = "*",
+          Action    = "s3:GetObject",
+          Resource  = "${aws_s3_bucket.this.arn}/*"
+        }
+      ] : [],
+
+      # 2) Website 전용 정책 (enable_website = true일 때만 적용)
+      var.enable_website ? [
+        {
+          Sid       = "WebsiteReadGetObject",
+          Effect    = "Allow",
+          Principal = {
+            Service = "cloudfront.amazonaws.com"
+          },
+          Action    = "s3:GetObject",
+          Resource  = "${aws_s3_bucket.this.arn}/*",
+          Condition = {
+            StringEquals = {
+              "AWS:SourceArn" = var.cloudfront_distribution_arn
+            }
           }
         }
-      },
-      {
-        Sid       = "GitHubActionsPutObject",
-        Effect    = "Allow",
-        Principal = {
-          AWS = "arn:aws:iam::418295688903:role/GitHubActionsOIDCRole"  # GitHub Actions 역할 ARN으로 교체
-        },
-        Action    = ["s3:PutObject","s3:DeleteObject"]
-        Resource  = "${aws_s3_bucket.this.arn}/*"
-      }
-    ]
+      ] : [],
+
+      # 3) GitHub Actions 업로드 권한 (무조건 포함)
+      [
+        {
+          Sid       = "GitHubActionsPutObject",
+          Effect    = "Allow",
+          Principal = {
+            AWS = "arn:aws:iam::418295688903:role/GitHubActionsOIDCRole"
+          },
+          Action    = ["s3:PutObject", "s3:DeleteObject"],
+          Resource  = "${aws_s3_bucket.this.arn}/*"
+        }
+      ]
+    )
   })
 }
+
 
 resource "aws_s3_bucket_versioning" "this" {
   count  = var.is_versioning ? 1 : 0
